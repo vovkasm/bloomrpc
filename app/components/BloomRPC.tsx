@@ -35,9 +35,10 @@ export function BloomRPC() {
 
   const [environments, setEnvironments] = useState<EditorEnvironment[]>(getEnvironments());
 
-  function setTabs(props: EditorTabs) {
-    setEditorTabs(props);
-    storeTabs(props);
+  function setTabs(props: EditorTabs|undefined) {
+    const localProps = props || {activeKey: "0", tabs: []};
+    setEditorTabs(localProps);
+    storeTabs(localProps);
   }
 
   function setProtos(props: ProtoFile[]) {
@@ -137,20 +138,20 @@ export function BloomRPC() {
  * @param setProtos
  * @param setEditorTabs
  */
-async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTabs: React.Dispatch<EditorTabs>) {
-  const hydration = [];
+async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTabs: React.Dispatch<EditorTabs>): Promise<void> {
+  const tasks: Array<Promise<any>> = [];
   const savedProtos = getProtos();
   const importPaths = getImportPaths();
 
   if (savedProtos) {
-    hydration.push(
+    tasks.push(
       loadProtos(savedProtos, importPaths, handleProtoUpload(setProtos, []))
         .then(() => true)
     );
 
     const savedEditorTabs = getTabs();
     if (savedEditorTabs) {
-      hydration.push(
+      tasks.push(
         loadTabs(savedEditorTabs)
           .catch(() => setEditorTabs({activeKey: "0", tabs: []}))
           .then(setEditorTabs)
@@ -159,7 +160,7 @@ async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTa
     }
   }
 
-  return Promise.all(hydration);
+  return Promise.all(tasks).then();
 }
 
 /**
