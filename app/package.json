@@ -9,10 +9,6 @@
     "email": "fabri.feno@gmail.com",
     "url": "https://github.com/fenos"
   },
-  "scripts": {
-    "electron-rebuild": "node ../internals/scripts/ElectronRebuild.js",
-    "postinstall": "yarn electron-rebuild --version=7.1.11"
-  },
   "externals": [
     "grpc"
   ],
@@ -28,6 +24,6 @@
   "resolutions": {
     "bloomrpc-mock/**/protobufjs": "^6.9.0",
     "bloomrpc-mock": "^0.3.4",
-    "grpc": "1.24.7"
+    "grpc": "1.24.11"
   }
 }
