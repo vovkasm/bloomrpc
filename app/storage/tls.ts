@@ -2,14 +2,14 @@
 import * as Store from "electron-store";
 import { Certificate } from "../behaviour";
 
-const TLSStore = new Store({
+const TLSStore = new Store<{certificates: Certificate[]}>({
   name: "tls",
 });
 
 
 const TLS_KEYS = {
   CERTIFICATES: 'certificates'
-};
+} as const;
 
 
 export function storeTLSList(certs: Certificate[]) {

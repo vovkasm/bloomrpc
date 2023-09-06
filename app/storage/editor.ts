@@ -5,7 +5,15 @@ import { EditorTabs } from '../components/BloomRPC';
 import { EditorRequest } from '../components/Editor';
 import { EditorTabRequest } from "../components/TabList";
 
-const EditorStore = new Store({
+type EditorStorage = {
+  url: string,
+  protos: string[],
+  tabs: EditorTabsStorage,
+  requests: EditorRequest[],
+  metadata: string,
+};
+
+const EditorStore = new Store<EditorStorage>({
   name: "editor",
 });
 
@@ -16,7 +24,7 @@ const KEYS = {
   REQUESTS: "requests",
   INTERACTIVE: "interactive",
   METADATA: "metadata",
-};
+} as const;
 
 /**
  * Store URL

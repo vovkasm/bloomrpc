@@ -2,7 +2,7 @@
 import * as Store from "electron-store";
 
 
-const ImportPathsStore = new Store({
+const ImportPathsStore = new Store<{paths: string[]}>({
   name: "importPaths",
 });
 

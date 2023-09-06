@@ -2,13 +2,13 @@
 import * as Store from 'electron-store';
 import { EditorEnvironment } from "../components/Editor";
 
-const EnvironmentStore = new Store({
+const EnvironmentStore = new Store<{ENVIRONMENTS: EditorEnvironment[]}>({
   name: "environments",
 });
 
 const KEYS = {
   ENVIRONMENTS: "ENVIRONMENTS",
-};
+} as const;
 
 export function saveEnvironment(environment: EditorEnvironment) {
   const environments: EditorEnvironment[] = EnvironmentStore.get(KEYS.ENVIRONMENTS) || [];
