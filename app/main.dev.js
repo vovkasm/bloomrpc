@@ -22,16 +22,6 @@ require('electron-debug')();
 const store = require('electron-store');
 store.initRenderer();
 
-const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-  return Promise.all(
-    extensions.map(name => installer.default(installer[name], forceDownload))
-  ).catch(console.log);
-};
-
 /**
  * Add event listeners...
  */
@@ -45,13 +35,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', async () => {
-  if (
-    process.env.NODE_ENV === 'development' ||
-    process.env.DEBUG_PROD === 'true'
-  ) {
-    await installExtensions();
-  }
-
   ipcMain.handle('open-proto-files', async () => {
     const openDialogResult = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile', 'multiSelections'],
