@@ -2,10 +2,9 @@ import * as React from 'react';
 import { useEffect, useState } from "react";
 import {Menu, Button, Icon, Dropdown, Modal, Tooltip, Tree, Input} from 'antd';
 import { Badge } from '../Badge/Badge';
-import {OnProtoUpload, ProtoFile, ProtoService, importProtos, importProtosFromServerReflection} from '../../behaviour';
+import {OnProtoUpload, ProtoFile, ProtoService, importProtos} from '../../behaviour';
 import { PathResolution } from "./PathResolution";
 import { getImportPaths } from "../../storage";
-import {UrlResolution} from "./UrlResolution";
 
 interface SidebarProps {
   protos: ProtoFile[]
@@ -170,12 +169,7 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
               <Button key="back" onClick={() => setImportReflectionVisible(false)}>Close</Button>
             ]}
           >
-            <UrlResolution
-              onImportFromUrl={(url) => {
-                importProtosFromServerReflection(onProtoUpload, url)
-                setImportReflectionVisible(false)
-              }}
-            />
+            Not implemented
           </Modal>
         </div>
         <div style={{width: "50%", textAlign: "right"}}>
