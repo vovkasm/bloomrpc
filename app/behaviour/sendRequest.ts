@@ -1,7 +1,6 @@
 import { EventEmitter } from "events";
-import { credentials, Metadata, ServiceError } from "grpc";
+import { credentials, Metadata, ServiceError, Client } from "@grpc/grpc-js";
 import { ProtoInfo } from './protoInfo';
-import * as grpc from 'grpc';
 import * as fs from "fs";
 import { Certificate } from "./importCertificates";
 import * as grpcWeb from 'grpc-web'
@@ -56,7 +55,7 @@ export class GRPCRequest extends EventEmitter {
 
   send(): GRPCRequest {
     const serviceClient: any = this.protoInfo.client();
-    const client: grpc.Client = this.getClient(serviceClient);
+    const client: Client = this.getClient(serviceClient);
     let inputs = {};
     let metadata: {[key: string]: any} = {};
 
@@ -168,7 +167,7 @@ export class GRPCRequest extends EventEmitter {
    * Get grpc client for this relevant request
    * @param serviceClient
    */
-  private getClient(serviceClient: any): grpc.Client {
+  private getClient(serviceClient: any): Client {
     let creds = credentials.createInsecure();
     let options = {};
 
