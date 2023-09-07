@@ -28,8 +28,6 @@ module.exports = merge.smart(baseConfig, {
 
   entry: [
     'react-hot-loader/patch',
-    `webpack-dev-server/client?http://localhost:${port}/`,
-    'webpack/hot/only-dev-server',
     path.join(__dirname, 'app/index.tsx')
   ],
 
@@ -129,10 +127,6 @@ module.exports = merge.smart(baseConfig, {
   },
 
   plugins: [
-    new webpack.HotModuleReplacementPlugin({
-      multiStep: true
-    }),
-
     new webpack.NoEmitOnErrorsPlugin(),
 
     /**
@@ -166,30 +160,17 @@ module.exports = merge.smart(baseConfig, {
 
   devServer: {
     port,
-    publicPath,
-    compress: true,
-    // noInfo: true,
-    // stats: 'errors-only',
-    inline: true,
-    lazy: false,
     hot: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
-    contentBase: path.join(__dirname, 'dist'),
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    devMiddleware: {
+      publicPath,
+    },
     historyApiFallback: {
       verbose: true,
       disableDotRule: false
-    },
-    before() {
-      if (process.env.START_HOT) {
-        console.log('Starting Main Process...');
-        spawn('npm', ['run', 'start-main-dev'], {
-          shell: true,
-          env: process.env,
-          stdio: 'inherit'
-        })
-          .on('close', code => process.exit(code))
-          .on('error', spawnError => console.error(spawnError));
-      }
     }
   }
 });
