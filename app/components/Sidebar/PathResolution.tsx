@@ -43,14 +43,10 @@ export function PathResolution({ importPaths, onImportsChange }: PathResolutionP
                         setPathStateValue(e.target.value);
                       }}
                       onSearch={async () => {
-                        try {
-                          const path = await importResolvePath();
-                          if (path != null){
+                        const path = await importResolvePath();
+                        if (path){
                           setPathStateValue(path);
                           addImportPath(path, importPaths, onImportsChange);
-                        }
-                        } catch (e) {
-                          // No file selected.
                         }
                       }}
                     />

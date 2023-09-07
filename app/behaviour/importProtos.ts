@@ -1,4 +1,4 @@
-import {remote} from 'electron';
+import {ipcRenderer} from 'electron';
 import * as path from 'path';
 import {Proto, ProtoFile, ProtoService, ServiceMethodsPayload, walkServices} from './protobuf';
 import isURL, { IsURLOptions } from 'validator/lib/isURL';
@@ -20,18 +20,7 @@ export type OnProtoUpload = (protoFiles: ProtoFile[], err?: Error) => void
  * @param importPaths
  */
 export async function importProtos(onProtoUploaded: OnProtoUpload, importPaths?: string[]) {
-  const openDialogResult = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-    properties: ['openFile', 'multiSelections'],
-    filters: [
-      { name: 'Protos', extensions: ['proto'] },
-    ]
-  });
-
-  const filePaths = openDialogResult.filePaths;
-
-  if (!filePaths) {
-    return;
-  }
+  const filePaths = await ipcRenderer.invoke('open-proto-files') as string[];
   await loadProtosFromFile(filePaths, importPaths, onProtoUploaded);
 }
 
@@ -280,18 +269,7 @@ function parseServices(proto: Proto) {
   return services;
 }
 
-export function importResolvePath(): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    const openDialogResult = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-      properties: ['openDirectory'],
-      filters: []
-    });
-
-    const filePaths = openDialogResult.filePaths;
-
-    if (!filePaths) {
-      return reject("No folder selected");
-    }
-    resolve(filePaths[0]);
-  });
+export async function importResolvePath(): Promise<string|undefined> {
+    const filePaths = await ipcRenderer.invoke('open-directory') as string[];
+    return filePaths[0] || undefined;
 }

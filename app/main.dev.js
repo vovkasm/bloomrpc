@@ -7,7 +7,7 @@
  * `./app/main.prod.js` using webpack. This gives us some performance wins.
  *
  */
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const MenuBuilder = require('./menu');
 
 let mainWindow = null;
@@ -19,10 +19,13 @@ if (process.env.NODE_ENV === 'production') {
 
 require('electron-debug')();
 
+const store = require('electron-store');
+store.initRenderer();
+
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
+  const extensions = ['REACT_DEVELOPER_TOOLS'];
 
   return Promise.all(
     extensions.map(name => installer.default(installer[name], forceDownload))
@@ -48,6 +51,26 @@ app.on('ready', async () => {
   ) {
     await installExtensions();
   }
+
+  ipcMain.handle('open-proto-files', async () => {
+    const openDialogResult = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile', 'multiSelections'],
+      filters: [ { name: 'Protos', extensions: ['proto'] } ]
+    });
+  
+    const filePaths = openDialogResult.filePaths;
+    return filePaths || [];
+  });
+
+  ipcMain.handle('open-directory', async () => {
+    const openDialogResult = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory'],
+      filters: []
+    });
+
+    const filePaths = openDialogResult.filePaths;
+    return filePaths || [];
+  })
 
   mainWindow = new BrowserWindow({
     show: false,
