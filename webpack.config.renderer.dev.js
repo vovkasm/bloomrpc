@@ -159,7 +159,6 @@ module.exports = merge.smart(baseConfig, {
     }),
   ],
 
-  externals: ['grpc'],
   node: {
     __dirname: false,
     __filename: false
