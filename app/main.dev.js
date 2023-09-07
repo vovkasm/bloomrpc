@@ -70,7 +70,17 @@ app.on('ready', async () => {
 
     const filePaths = openDialogResult.filePaths;
     return filePaths || [];
-  })
+  });
+
+  ipcMain.handle('open-single-file', async () => {
+    const openDialogResult = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [ { name: 'All', extensions: ['*'] } ]
+    });
+
+    const filePaths = openDialogResult.filePaths;
+    return filePaths[0];
+  });
 
   mainWindow = new BrowserWindow({
     show: false,

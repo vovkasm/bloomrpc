@@ -1,36 +1,24 @@
-import { remote } from "electron";
+import { ipcRenderer } from "electron";
 import * as path from 'path';
 import * as fs from 'fs';
 import { ProtoInfo } from "./protoInfo";
 import { EditorState } from "../components/Editor";
 
 
-export function exportResponseToJSONFile(protoInfo: ProtoInfo, editorState: EditorState) {
-  return new Promise(async (resolve, reject) => {
-    const openDialogResult = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-      properties: ['openDirectory'],
-      filters: []
-    });
+export async function exportResponseToJSONFile(protoInfo: ProtoInfo, editorState: EditorState): Promise<void> {
+  const filePaths = await ipcRenderer.invoke('open-directory') as string[];
+  if (!filePaths || filePaths.length === 0) return;
 
-    const filePaths = openDialogResult.filePaths;
+  const timestamp = new Date().getTime();
+  const basePath = filePaths[0];
+  const fileName = `${protoInfo.service.serviceName}.${protoInfo.methodName}_${timestamp}`;
 
-    if (!filePaths) {
-      return reject("No folder selected");
-    }
+  const exportPath = path.join(basePath, fileName);
 
-    const timestamp = new Date().getTime();
-    const basePath = filePaths[0];
-    const fileName = `${protoInfo.service.serviceName}.${protoInfo.methodName}_${timestamp}`;
-
-    const exportPath = path.join(basePath, fileName);
-
-    const responseData = editorState.response.output
-        ? editorState.response.output
-        : JSON.stringify(editorState.responseStreamData.map((steam) => JSON.parse(steam.output)), null, 2);
+  const responseData = editorState.response.output
+      ? editorState.response.output
+      : JSON.stringify(editorState.responseStreamData.map((steam) => JSON.parse(steam.output)), null, 2);
 
 
-    fs.writeFileSync(exportPath, responseData);
-
-    resolve(exportPath);
-  });
+  fs.writeFileSync(exportPath, responseData);
 }

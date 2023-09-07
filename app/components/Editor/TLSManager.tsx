@@ -180,6 +180,7 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
 async function handleImportRootCert(certs: Certificate[], setCerts: React.Dispatch<Certificate[]>): Promise<Certificate | void> {
   try {
     const certificate = await importRootCert();
+    if (!certificate) return;
 
     const newCerts = certs
         .filter((cert) => cert.rootCert.filePath !== certificate.rootCert.filePath);
@@ -200,7 +201,10 @@ async function handleImportPrivateKey(
     setCerts: React.Dispatch<Certificate[]>
 ): Promise<Certificate | void> {
   try {
-    certificate.privateKey = await importPrivateKey();
+    const privateKey = await importPrivateKey();
+    if (!privateKey) return;
+
+    certificate.privateKey = privateKey;
 
     const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
     certs[certIndex] = certificate;
@@ -218,7 +222,10 @@ async function handleImportCertChain(
     setCerts: React.Dispatch<Certificate[]>
 ): Promise<Certificate | void> {
   try {
-    certificate.certChain = await importCertChain();
+    const certChain = await importCertChain();
+    if (!certChain) return;
+
+    certificate.certChain = certChain;
 
     const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
     certs[certIndex] = certificate;
