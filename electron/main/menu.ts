@@ -1,9 +1,10 @@
-const { app, Menu, shell } = require('electron');
-const openAboutWindow = require('./about/open-about-window');
+import { app, BrowserWindow, Menu, shell } from 'electron';
+import openAboutWindow from './open-about-window';
 
-module.exports = class MenuBuilder {
+export default class MenuBuilder {
+  mainWindow: BrowserWindow;
 
-  constructor(mainWindow) {
+  constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
   }
 

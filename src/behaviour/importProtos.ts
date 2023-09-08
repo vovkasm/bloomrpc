@@ -8,8 +8,7 @@ import * as protobuf from 'protobufjs';
 import { v4 as uuidv4 } from 'uuid'
 
 const commonProtosPath = [
-  // @ts-ignore
-  path.join(__static),
+  path.join(process.env.VITE_PUBLIC),
 ];
 
 export type OnProtoUpload = (protoFiles: ProtoFile[], err?: Error) => void

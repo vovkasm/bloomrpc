@@ -1,33 +1,31 @@
-const { BrowserWindow, remote, shell } = require('electron');
-const path = require('path');
-const icon = process.env.HOT
-    ? path.join(__dirname, '../../resources/icon.ico')
-    : path.join(process.resourcesPath, 'icon.ico')
+import { BrowserWindow, shell } from 'electron';
 
-let aboutWin = null;
+import path from 'path';
 
-module.exports = function openAboutWindow(parentWindow) {
+const icon = path.join(process.resourcesPath, 'icon.ico')
+
+let aboutWin: BrowserWindow;
+
+export default function openAboutWindow(parentWindow?: BrowserWindow) {
     if (aboutWin !== null) {
         aboutWin.focus();
         return aboutWin;
     }
 
-    const options = {
+    aboutWin = new BrowserWindow({
         width: 400,
         height: 400,
         useContentSize: true,
-        titleBarStyle: 'hidden-inset',
+        titleBarStyle: 'hiddenInset',
         icon: icon,
         parent: parentWindow,
         webPreferences: {
             nodeIntegration: true
         }
-    }
-
-    aboutWin = new (BrowserWindow || remote.BrowserWindow)(options);
+    });
 
     aboutWin.once('closed', () => {
-        aboutWin = null;
+        aboutWin = undefined as any;
     });
 
     const aboutHTML = process.env.NODE_ENV !== 'production'
@@ -36,10 +34,6 @@ module.exports = function openAboutWindow(parentWindow) {
     aboutWin.loadURL(aboutHTML);
 
     aboutWin.webContents.on('will-navigate', (e, url) => {
-        e.preventDefault();
-        shell.openExternal(url);
-    });
-    aboutWin.webContents.on('new-window', (e, url) => {
         e.preventDefault();
         shell.openExternal(url);
     });
@@ -62,13 +56,13 @@ module.exports = function openAboutWindow(parentWindow) {
         } else {
             info = {
                 icon_path: icon,
-                product_name: PRODUCT_NAME,
-                copyright: COPYRIGHT,
-                homepage: HOMEPAGE,
-                description: DESCRIPTION,
-                license: LICENSE,
-                bug_report_url: BUG_REPORT_URL,
-                version: VERSION,
+                product_name: __PRODUCT_NAME__,
+                copyright: __COPYRIGHT__,
+                homepage: __HOMEPAGE__,
+                description: __DESCRIPTION__,
+                license: __LICENSE__,
+                bug_report_url: __BUG_REPORT_URL__,
+                version: __VERSION__,
                 use_version_info: true,
             }
         }

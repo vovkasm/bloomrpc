@@ -1,23 +1,23 @@
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `yarn build` or `yarn build-main`, this file is compiled to
- * `./app/main.prod.js` using webpack. This gives us some performance wins.
- *
- */
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const MenuBuilder = require('./menu');
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import { join } from 'node:path'
 
-let mainWindow = null;
+import MenuBuilder from  './menu';
 
-if (process.env.NODE_ENV === 'production') {
-  const sourceMapSupport = require('source-map-support');
-  sourceMapSupport.install();
-}
+// The built directory structure
+//
+// ├─┬ dist-electron
+// │ ├─┬ main
+// │ │ └── index.js    > Electron-Main
+// │ └─┬ preload
+// │   └── index.js    > Preload-Scripts
+// ├─┬ dist
+// │ └── index.html    > Electron-Renderer
+//
+process.env.DIST_ELECTRON = join(__dirname, '../')
+process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
+process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? join(process.env.DIST_ELECTRON, '../public') : process.env.DIST
 
-require('electron-debug')();
+let mainWindow: BrowserWindow;
 
 const store = require('electron-store');
 store.initRenderer();
@@ -76,7 +76,11 @@ app.on('ready', async () => {
     }
   });
 
-  mainWindow.loadURL(`file://${__dirname}/app.html`);
+  if (process.env.VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(`${process.env.VITE_DEV_SERVER_URL}/public/app.html`)
+  } else {
+    mainWindow.loadFile(join(process.env.DIST, 'app.html'));
+  }
 
   // https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.once('ready-to-show', () => {
@@ -91,7 +95,7 @@ app.on('ready', async () => {
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;
+    mainWindow = undefined as any;
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
