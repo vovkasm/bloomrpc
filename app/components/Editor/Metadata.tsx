@@ -65,7 +65,7 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
             highlightActiveLine={false}
             value={value}
             setOptions={{
-              useWorker: true
+              useWorker: false
             }}
           />
         </div>

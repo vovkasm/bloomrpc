@@ -41,7 +41,7 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
           editor.gotoLine(0, 0, true);
         }}
         setOptions={{
-          useWorker: true,
+          useWorker: false,
           displayIndentGuides: false,
           showLineNumbers: false,
           highlightGutterLine: false,

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AceEditor, { Command } from 'react-ace';
+import AceEditor, { ICommand } from 'react-ace';
 import * as Mousetrap from 'mousetrap'
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 import { Tabs } from 'antd';
@@ -9,7 +9,7 @@ interface RequestProps {
   data: string
   streamData: string[]
   onChangeData: (value: string) => void
-  commands?: Command[]
+  commands?: ICommand[]
   active?: boolean
 }
 
@@ -54,7 +54,7 @@ export function Request({onChangeData, commands, data, streamData, active}: Requ
             highlightActiveLine={false}
             value={data}
             setOptions={{
-              useWorker: true,
+              useWorker: false,
               displayIndentGuides: true
             }}
             tabSize={2}
