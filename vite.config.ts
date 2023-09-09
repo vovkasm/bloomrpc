@@ -3,12 +3,10 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import electron from 'vite-plugin-electron/simple'
-import renderer from 'vite-plugin-electron-renderer'
 import pkg from './package.json'
 
 const external = Object.keys('dependencies' in pkg ? pkg.dependencies : {});
 
-// https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
   rmSync('dist-electron', { recursive: true, force: true })
 
