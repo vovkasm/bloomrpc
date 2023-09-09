@@ -11,11 +11,11 @@ import store from 'electron-store';
 // │ └─┬ preload
 // │   └── index.js    > Preload-Scripts
 // ├─┬ dist
-// │ └── index.html    > Electron-Renderer
+// │ └── app.html    > Electron-Renderer
 //
-process.env.DIST_ELECTRON = join(__dirname, '../')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
-process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? join(process.env.DIST_ELECTRON, '../public') : process.env.DIST
+process.env.DIST_ELECTRON = join(__dirname, '../');
+process.env.DIST = join(process.env.DIST_ELECTRON, '../dist');
+process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? join(process.env.DIST_ELECTRON, '../public') : process.env.DIST;
 
 let mainWindow: BrowserWindow;
 
@@ -76,7 +76,8 @@ app.on('ready', async () => {
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(`${process.env.VITE_DEV_SERVER_URL}/public/app.html`)
+    const url = new URL('src/app.html', process.env.VITE_DEV_SERVER_URL);
+    mainWindow.loadURL(url.toString())
   } else {
     mainWindow.loadFile(join(process.env.DIST, 'app.html'));
   }

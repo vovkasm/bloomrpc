@@ -1,11 +1,28 @@
 import { rmSync } from 'node:fs'
 import path from 'node:path'
-import { defineConfig } from 'vite'
+import { defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import electron from 'vite-plugin-electron/simple'
 import pkg from './package.json'
 
 const external = Object.keys('dependencies' in pkg ? pkg.dependencies : {});
+
+const cspPlugin: Plugin = {
+  name: 'cspPlugin',
+  apply: 'serve',
+  configureServer: {
+    handler(server) {
+      server.middlewares.use((req, res, next) => {
+        console.log('REQ', req.url);
+        const url = req.url || '';
+        if (url.match(/app\.html$/)) {
+          res.appendHeader('Content-Security-Policy', `script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src blob:`)
+        }
+        next();
+      });
+    }
+  }
+};
 
 export default defineConfig(({ command }) => {
   rmSync('dist-electron', { recursive: true, force: true })
@@ -18,7 +35,7 @@ export default defineConfig(({ command }) => {
     build: {
       rollupOptions: {
         input: {
-          app: path.join(__dirname, 'public/app.html'),
+          app: path.join(__dirname, 'src/app.html'),
         },
       },
     },
@@ -32,7 +49,6 @@ export default defineConfig(({ command }) => {
       __VERSION__: JSON.stringify(pkg.version)
     },
     plugins: [
-      react(),
       electron({
         main: {
           entry: 'electron/main/index.ts',
@@ -64,7 +80,8 @@ export default defineConfig(({ command }) => {
           },
         },
         renderer: {}
-      })
+      }),
+      cspPlugin,
     ],
     server: process.env.VSCODE_DEBUG && (() => {
       const url = new URL(pkg.debug.env.VITE_DEV_SERVER_URL)
