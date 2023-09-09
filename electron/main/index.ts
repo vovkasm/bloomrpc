@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from 'node:path'
 
+import store from 'electron-store';
+
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -17,9 +19,6 @@ process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? join(process.env.DIS
 
 let mainWindow: BrowserWindow;
 
-const store = require('electron-store');
-store.initRenderer();
-
 /**
  * Add event listeners...
  */
@@ -33,6 +32,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', async () => {
+  store.initRenderer();
+
   ipcMain.handle('open-proto-files', async () => {
     const openDialogResult = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile', 'multiSelections'],
@@ -70,7 +71,7 @@ app.on('ready', async () => {
     backgroundColor: "#f0f2f5",
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
     }
   });
 
