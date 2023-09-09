@@ -1,8 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from 'node:path'
 
-import MenuBuilder from  './menu';
-
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -97,7 +95,4 @@ app.on('ready', async () => {
   mainWindow.on('closed', () => {
     mainWindow = undefined as any;
   });
-
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
 });

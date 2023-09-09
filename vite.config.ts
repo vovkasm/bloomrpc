@@ -18,7 +18,6 @@ export default defineConfig(({ command }) => {
     build: {
       rollupOptions: {
         input: {
-          about: path.join(__dirname, 'public/about.html'),
           app: path.join(__dirname, 'public/app.html'),
         },
       },
