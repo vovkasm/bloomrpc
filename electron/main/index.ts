@@ -79,7 +79,7 @@ app.on('ready', async () => {
     const url = new URL('src/app.html', process.env.VITE_DEV_SERVER_URL);
     mainWindow.loadURL(url.toString())
   } else {
-    mainWindow.loadFile(join(process.env.DIST, 'app.html'));
+    mainWindow.loadFile(join(process.env.DIST, 'src/app.html'));
   }
 
   // https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
