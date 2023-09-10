@@ -1,9 +1,9 @@
-import { rmSync } from 'node:fs'
-import path from 'node:path'
-import { defineConfig, Plugin } from 'vite'
-import react from '@vitejs/plugin-react'
-import electron from 'vite-plugin-electron/simple'
-import pkg from './package.json'
+import { rmSync } from 'node:fs';
+import path from 'node:path';
+import { defineConfig, Plugin, UserConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import electron from 'vite-plugin-electron/simple';
+import pkg from './package.json';
 
 const external = Object.keys('dependencies' in pkg ? pkg.dependencies : {});
 
@@ -13,7 +13,6 @@ const cspPlugin: Plugin = {
   configureServer: {
     handler(server) {
       server.middlewares.use((req, res, next) => {
-        console.log('REQ', req.url);
         const url = req.url || '';
         if (url.match(/app\.html$/)) {
           res.appendHeader('Content-Security-Policy', `script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src blob:`)
@@ -31,13 +30,18 @@ export default defineConfig(({ command }) => {
   const isBuild = command === 'build'
   const sourcemap = isServe || process.env.VSCODE_DEBUG ? true : false;
 
-  return {
+  const cfg: UserConfig = {
     build: {
       rollupOptions: {
         input: {
           app: path.join(__dirname, 'src/app.html'),
         },
       },
+    },
+    resolve: {
+      alias: [
+        {find: 'rc-switch', replacement: 'rc-switch/lib/index.js'}
+      ]
     },
     define: {
       __PRODUCT_NAME__: JSON.stringify(pkg.productName),
@@ -79,7 +83,14 @@ export default defineConfig(({ command }) => {
             },
           },
         },
-        renderer: {}
+        renderer: {
+          resolve: {
+            ismobilejs: { type: 'cjs' },
+          }
+        }
+      }),
+      react({
+        jsxRuntime: 'classic',
       }),
       cspPlugin,
     ],
@@ -89,4 +100,5 @@ export default defineConfig(({ command }) => {
     })(),
     clearScreen: false,
   }
+  return cfg;
 })
