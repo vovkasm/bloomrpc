@@ -1,0 +1,15 @@
+diff --git a/node_modules/antd/es/icon/index.js b/node_modules/antd/es/icon/index.js
+index ee3472b..dca4a66 100644
+--- a/node_modules/antd/es/icon/index.js
++++ b/node_modules/antd/es/icon/index.js
+@@ -39,9 +39,7 @@ import warning from '../_util/warning';
+ import LocaleReceiver from '../locale-provider/LocaleReceiver';
+ import { getTwoToneColor, setTwoToneColor } from './twoTonePrimaryColor'; // Initial setting
+ 
+-ReactIcon.add.apply(ReactIcon, _toConsumableArray(Object.keys(allIcons).map(function (key) {
+-  return allIcons[key];
+-})));
++ReactIcon.add.apply(ReactIcon, _toConsumableArray(Object.keys(allIcons).map((key) => allIcons[key]).filter((o) => o.name && o.theme)));
+ setTwoToneColor('#1890ff');
+ var defaultTheme = 'outlined';
+ var dangerousTheme;
