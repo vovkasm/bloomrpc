@@ -59,7 +59,7 @@ export function BloomRPC() {
             protos={protos}
             onProtoUpload={handleProtoUpload(setProtos, protos)}
             onReload={() => {
-              hydrateEditor(setProtos, setEditorTabs);
+              hydrateEditor(setProtos, setTabs);
             }}
             onMethodSelected={handleMethodSelected(editorTabs, setTabs)}
             onDeleteAll={() => {

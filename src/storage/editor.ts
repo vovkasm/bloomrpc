@@ -52,7 +52,7 @@ export function storeProtos(protos: ProtoFile[]) {
 /**
  * Get proto list
  */
-export function getProtos(): string[] | void {
+export function getProtos(): string[] | undefined {
   return EditorStore.get(KEYS.PROTOS);
 }
 

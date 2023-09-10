@@ -21,7 +21,7 @@ export type OnProtoUpload = (protoFiles: ProtoFile[], err?: Error) => void
  */
 export async function importProtos(onProtoUploaded: OnProtoUpload, importPaths?: string[]) {
   const filePaths = await ipcRenderer.invoke('open-proto-files') as string[];
-  await loadProtosFromFile(filePaths, importPaths, onProtoUploaded);
+  await loadProtos(filePaths, importPaths, onProtoUploaded);
 }
 
 /**
@@ -30,29 +30,7 @@ export async function importProtos(onProtoUploaded: OnProtoUpload, importPaths?:
  * @param importPaths
  * @param onProtoUploaded
  */
-export async function loadProtos(protoPaths: string[], importPaths?: string[], onProtoUploaded?: OnProtoUpload): Promise<ProtoFile[]> {
-  let validateOptions: IsURLOptions = {
-    require_tld: false,
-    require_protocol: false,
-    require_host: false,
-    require_valid_protocol: false,
-  }
-  const protoFiles = protoPaths.filter((protoPath) => {
-    return !isURL(protoPath, validateOptions);
-  })
-
-  const protoFileFromFiles = await loadProtosFromFile(protoFiles, importPaths, onProtoUploaded);
-
-  return protoFileFromFiles;
-}
-
-/**
- * Load protocol buffer files from proto files
- * @param filePaths
- * @param importPaths
- * @param onProtoUploaded
- */
-export async function loadProtosFromFile(filePaths: string[], importPaths?: string[], onProtoUploaded?: OnProtoUpload): Promise<ProtoFile[]> {
+export async function loadProtos(filePaths: string[], importPaths?: string[], onProtoUploaded?: OnProtoUpload): Promise<ProtoFile[]> {
   try {
     const protos = await Promise.all(filePaths.map(async (filePath) => {
       const root = await protobuf.load(filePath);
