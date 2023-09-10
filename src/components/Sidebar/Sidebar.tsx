@@ -5,6 +5,7 @@ import { Badge } from '../Badge/Badge';
 import {OnProtoUpload, ProtoFile, ProtoService, importProtos} from '../../behaviour';
 import { PathResolution } from "./PathResolution";
 import { getImportPaths } from "../../storage";
+import { strcmp } from '../../utils';
 
 interface SidebarProps {
   protos: ProtoFile[]
@@ -218,13 +219,13 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
             onMethodDoubleClick(protoDefinitions.methodName, protoDefinitions.protodef.services[protoDefinitions.serviceName])
           }}
         >
-          {protos.map((proto) => (
+          {protos.sort((a, b) => strcmp(a.fileName, b.fileName)).map((proto) => (
             <Tree.TreeNode
               icon={() => <Badge type="protoFile"> P </Badge>}
               title={proto.fileName}
               key={proto.fileName}
             >
-              {Object.keys(proto.services).map((service) => (
+              {Object.keys(proto.services).sort((a, b) => strcmp(a, b)).map((service) => (
                 <Tree.TreeNode
                   icon={<Badge type="service"> S </Badge>}
                   title={service}
@@ -232,6 +233,7 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
                 >
 
                   {proto.services[service].methodsName
+                    .sort((a, b) => strcmp(a, b))
                     .filter((name) => {
                       if (filterMatch === null) return true;
                       return name.toLowerCase().includes(filterMatch.toLowerCase());
