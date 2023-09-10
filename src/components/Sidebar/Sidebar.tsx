@@ -1,11 +1,25 @@
 import * as React from 'react';
 import { useEffect, useState } from "react";
-import {Menu, Button, Icon, Dropdown, Modal, Tooltip, Tree, Input} from 'antd';
 import { Badge } from '../Badge/Badge';
 import {OnProtoUpload, ProtoFile, ProtoService, importProtos} from '../../behaviour';
 import { PathResolution } from "./PathResolution";
 import { getImportPaths } from "../../storage";
 import { strcmp } from '../../utils';
+import {
+  AnchorButton,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  InputGroup,
+  Navbar,
+  NavbarDivider,
+  NavbarGroup,
+  NavbarHeading,
+  Tooltip,
+  Tree,
+  TreeNodeInfo,
+} from '@blueprintjs/core';
 
 interface SidebarProps {
   protos: ProtoFile[]
@@ -21,8 +35,7 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
   const [importPaths, setImportPaths] = useState<string[]>([""]);
   const [importPathVisible, setImportPathsVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [filterMatch, setFilterMatch] = useState<string|null>(null);
-  const [importReflectionVisible, setImportReflectionVisible] = useState(false);
+  const [filterMatch, setFilterMatch] = useState<string|undefined>(undefined);
 
   useEffect(() => {
     setImportPaths(getImportPaths());
@@ -60,232 +73,111 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
   function toggleFilter() {
     setFilterVisible(!filterVisible);
     if (filterVisible) {
-      setFilterMatch(null);
+      setFilterMatch(undefined);
     }
   }
 
   return (
     <>
-      <div style={styles.sidebarTitleContainer}>
-        <div>
-          <h3 style={styles.sidebarTitle}>Protos</h3>
-        </div>
-
-        <div
-          style={{display: "flex", flexDirection: "column", justifyContent: "center"}}
+      <Navbar className='bp5-dark'>
+        <NavbarGroup>
+          <NavbarHeading>Protos</NavbarHeading>
+          <Tooltip content='Import proto definitions' placement='bottom'>
+            <Button intent='primary' icon='plus' onClick={() => importProtos(onProtoUpload, importPaths)} />
+          </Tooltip>
+          <NavbarDivider />
+          <Tooltip content='Reload' placement='bottom'>
+            <Button icon='refresh' minimal onClick={onReload} />
+          </Tooltip>
+          <Tooltip content='Import Paths' placement='bottom'>
+            <Button icon='array' minimal onClick={() => setImportPathsVisible(true)} />
+          </Tooltip>
+          <Tooltip content='Filter method names' placement='bottom'>
+            <AnchorButton icon='filter' minimal onClick={() => toggleFilter()} />
+          </Tooltip>
+        </NavbarGroup>
+        <NavbarGroup align='right'>
+          <Tooltip content='Delete all' placement='bottom'>
+            <Button icon='trash' minimal intent='danger' onClick={onDeleteAll} />
+          </Tooltip>
+        </NavbarGroup>
+      </Navbar>
+      <Dialog
+        title="Import Paths"
+        icon="folder-new"
+        isOpen={importPathVisible}
+        onClose={() => setImportPathsVisible(false)}
         >
-          <Dropdown.Button
-            type="primary"
-            onClick={() => {
-              importProtos(onProtoUpload, importPaths)
-            }}
-            overlay={
-              <Menu>
-                <Menu.Item key="1" onClick={() => {
-                  importProtos(onProtoUpload, importPaths)
-                }}>
-                  <Icon type="file" />
-                  Import from file
-                </Menu.Item>
-                <Menu.Item key="2" onClick={() => {
-                  setImportReflectionVisible(true)
-                }}>
-                  <Icon type="eye" />
-                  Import from server reflection
-                </Menu.Item>
-              </Menu>
-            }
-          >
-            <Icon type="plus" />
-          </Dropdown.Button>
-        </div>
-      </div>
+          <DialogBody>
+            <PathResolution onImportsChange={setImportPaths} importPaths={importPaths} />
+          </DialogBody>
+          <DialogFooter actions={(
+            <Button text="Close" onClick={() => setImportPathsVisible(false)}/>
+          )} />
+      </Dialog>
 
-      <div style={styles.optionsContainer}>
-        <div style={{width: "50%"}}>
-          <Tooltip title="Reload" placement="bottomLeft" align={{offset: [-8, 0]}}>
-            <Button
-              type="ghost"
-              style={{height: 24, paddingRight: 5, paddingLeft: 5}}
-              onClick={onReload}
-            >
-              <Icon type="reload" style={{cursor: "pointer", color: "#1d93e6"}}/>
-            </Button>
-          </Tooltip>
+      <div style={{ flex: 1, overflowY: "scroll" }}>
 
-          <Tooltip title="Import Paths" placement="bottomLeft" align={{offset: [-8, 0]}}>
-            <Button
-                type="ghost"
-                style={{height: 24, paddingRight: 5, paddingLeft: 5, marginLeft: 5}}
-                onClick={() => setImportPathsVisible(true)}
-            >
-              <Icon type="file-search" style={{cursor: "pointer", color: "#1d93e6"}}/>
-            </Button>
-          </Tooltip>
-
-          <Tooltip title="Filter method names" placement="bottomLeft" align={{offset: [-8, 0]}}>
-            <Button
-              type="ghost"
-              style={{height: 24, paddingRight: 5, paddingLeft: 5, marginLeft: 5}}
-              onClick={() => toggleFilter()}
-            >
-              <Icon type="filter" style={{cursor: "pointer", color: "#1d93e6"}}/>
-            </Button>
-          </Tooltip>
-
-          <Modal
-              title={(
-                  <div>
-                    <Icon type="file-search" />
-                    <span style={{marginLeft: 10}}> Import Paths </span>
-                  </div>
-              )}
-              visible={importPathVisible}
-              onCancel={() => setImportPathsVisible(false)}
-              onOk={() => setImportPathsVisible(false)}
-              bodyStyle={{padding: 0}}
-              width={750}
-              footer={[
-                <Button key="back" onClick={() => setImportPathsVisible(false)}>Close</Button>
-              ]}
-          >
-            <PathResolution
-                onImportsChange={setImportPaths}
-                importPaths={importPaths}
-            />
-          </Modal>
-
-          <Modal
-            title={(
-              <div>
-                <Icon type="eye" />
-                <span style={{marginLeft: 10}}> Import from server reflection </span>
-              </div>
-            )}
-            visible={importReflectionVisible}
-            onCancel={() => setImportReflectionVisible(false)}
-            onOk={() => setImportReflectionVisible(false)}
-            width={750}
-            footer={[
-              <Button key="back" onClick={() => setImportReflectionVisible(false)}>Close</Button>
-            ]}
-          >
-            Not implemented
-          </Modal>
-        </div>
-        <div style={{width: "50%", textAlign: "right"}}>
-          <Tooltip title="Delete all" placement="bottomRight" align={{offset: [10, 0]}}>
-            <Button type="ghost" style={{height: 24, paddingRight: 5, paddingLeft: 5}} onClick={onDeleteAll}>
-              <Icon type="delete" style={{cursor: "pointer", color: "red" }} />
-            </Button>
-          </Tooltip>
-        </div>
-      </div>
-
-      <div style={{
-        overflow: "auto",
-        maxHeight: "calc(100vh - 85px)",
-        height: "100%"
-      }}>
-
-        <Input
+        <InputGroup
           placeholder={"Filter methods"}
           hidden={!filterVisible}
-          onChange={(v) => setFilterMatch(v.target.value || null)}
+          onChange={(v) => setFilterMatch(v.target.value || undefined)}
         />
-
-        {protos.length > 0 && <Tree.DirectoryTree
-          showIcon
-          defaultExpandAll
-          onSelect={async (selectedKeys) => {
-            const selected = selectedKeys.pop();
-            const protoDefinitions = processSelectedKey(selected);
-
-            if (!protoDefinitions){
-              return;
-            }
-
-            onMethodSelected(protoDefinitions.methodName, protoDefinitions.protodef.services[protoDefinitions.serviceName]);
-          }}
-          onDoubleClick={async (event, treeNode)=>{
-            const selected = treeNode.props.eventKey;
-            const protoDefinitions = processSelectedKey(selected);
-
-            if (!protoDefinitions){
-              return;
-            }
-
-            // if the original one table doesn't exist, then ignore it
-            onMethodDoubleClick(protoDefinitions.methodName, protoDefinitions.protodef.services[protoDefinitions.serviceName])
-          }}
-        >
-          {protos.sort((a, b) => strcmp(a.fileName, b.fileName)).map((proto) => (
-            <Tree.TreeNode
-              icon={() => <Badge type="protoFile"> P </Badge>}
-              title={proto.fileName}
-              key={proto.fileName}
-            >
-              {Object.keys(proto.services).sort((a, b) => strcmp(a, b)).map((service) => (
-                <Tree.TreeNode
-                  icon={<Badge type="service"> S </Badge>}
-                  title={service}
-                  key={`${proto.fileName}-${service}`}
-                >
-
-                  {proto.services[service].methodsName
-                    .sort((a, b) => strcmp(a, b))
-                    .filter((name) => {
-                      if (filterMatch === null) return true;
-                      return name.toLowerCase().includes(filterMatch.toLowerCase());
-                    })
-                    .map((method: any) => (
-                      <Tree.TreeNode
-                        icon={<Badge type="method"> M </Badge>}
-                        title={method}
-                        key={`${proto.proto.filePath}||method:${method}||service:${service}`}
-                      >
-                    </Tree.TreeNode>
-                  ))}
-                </Tree.TreeNode>
-              ))}
-            </Tree.TreeNode>
-          ))}
-        </Tree.DirectoryTree>}
+        {protos.length > 0 ? (
+          <Tree
+            contents={getTreeData(protos, filterMatch)}
+            onNodeClick={async (node) => {
+              const nodeData = node.nodeData;
+              if (!nodeData) return;  
+              onMethodSelected(nodeData.methodName, nodeData.protoFile.services[nodeData.serviceName]);  
+            }}
+            onNodeDoubleClick={async (node) => {
+              const nodeData = node.nodeData;
+              if (!nodeData) return;  
+              onMethodDoubleClick(nodeData.methodName, nodeData.protoFile.services[nodeData.serviceName]);  
+            }}
+          />
+        ) : null}
       </div>
     </>
   );
 }
 
-const styles = {
-  sidebarTitleContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    paddingTop: 6,
-    paddingBottom: 4,
-    paddingLeft: 20,
-    paddingRight: 10,
-    borderBottom: "1px solid #eee",
-    background: "#001529"
-  },
-  sidebarTitle: {
-    color: "#fff",
-    marginTop: "0.5em"
-  },
-  icon: {
-    fontSize: 23,
-    marginBottom: 7,
-    marginRight: 12,
-    marginTop: -2,
-    color: "#28d440",
-    border: "2px solid #f3f6f9",
-    borderRadius: "50%",
-    cursor: "pointer"
-  },
-  optionsContainer: {
-    background: "#fafafa",
-    padding: "3px 6px",
-    display: "flex",
-    alignContent: "space-between",
-    borderBottom: "1px solid #e0e0e0",
-  }
-};
+type TreeNodeData = {
+  type: 'method',
+  methodName: string,
+  serviceName: string,
+  protoFile: ProtoFile,
+} | undefined;
+
+function getTreeData(protos: ProtoFile[], filterMatch: string|undefined): TreeNodeInfo<TreeNodeData>[] {
+  return protos.sort((a, b) => strcmp(a.fileName, b.fileName)).map((proto) => ({
+    id: proto.fileName,
+    icon: <Badge type="protoFile">P</Badge>,
+    label: proto.fileName,
+    isExpanded: true,
+    childNodes: Object.keys(proto.services).sort((a, b) => strcmp(a, b)).map((service) => ({
+      id: `${proto.fileName}-service:${service}`,
+      icon: <Badge type="service">S</Badge>,
+      label: service,
+      isExpanded: true,
+      childNodes: proto.services[service].methodsName
+      .sort((a, b) => strcmp(a, b))
+      .filter((name) => {
+        if (!filterMatch) return true;
+        return name.toLowerCase().includes(filterMatch.toLowerCase());
+      })
+      .map((method: any) => ({
+        id: `${proto.proto.filePath}||method:${method}||service:${service}`,
+        icon: <Badge type="method">M</Badge>,
+        label: method,
+        nodeData: {
+          type: 'method',
+          methodName: method,
+          serviceName: service,
+          protoFile: proto,
+        }
+      })),
+    })),
+  }));
+}

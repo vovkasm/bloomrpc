@@ -294,6 +294,8 @@ const styles = {
     borderRight: "1px solid rgba(0, 21, 41, 0.18)",
     backgroundColor: "white",
     boxShadow: "3px 0px 4px 0px rgba(0,0,0,0.10)",
+    display: 'flex',
+    flexDirection: 'column',
   },
   content: {
     flex: 1,
