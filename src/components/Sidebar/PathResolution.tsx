@@ -1,99 +1,30 @@
 import * as React from 'react';
-import { Icon, Input, Table, Tooltip } from "antd";
-import { useState } from "react";
-import { importResolvePath } from "../../behaviour";
 import { storeImportPaths } from "../../storage";
+import { Button, Card, CardList, Text } from '@blueprintjs/core';
 
 interface PathResolutionProps {
   onImportsChange?: (paths: string[]) => void
   importPaths: string[]
 }
 
-interface TablePath {
-  value: string
-}
-
 export function PathResolution({ importPaths, onImportsChange }: PathResolutionProps) {
-  const [pathValue, setPathStateValue] = useState("");
-  const tablePaths = importPaths.map(importPath => ({
-    value: importPath,
-  }));
-
   return (
-    <div>
-      <Table
-          dataSource={tablePaths}
-          pagination={false}
-          rowKey={(path) => path.value || "addPath"}
-      >
-        <Table.Column
-          title="Path"
-          width={"90%"}
-          key={"pathColumn"}
-          render={(text, record: TablePath) => {
-            return (
-                <>
-                {!record.value ? (
-                    <Input.Search
-                      value={pathValue}
-                      placeholder={"Absolute path"}
-                      enterButton={"..."}
-                      autoFocus={pathValue === ""}
-                      onChange={(e) => {
-                        setPathStateValue(e.target.value);
-                      }}
-                      onSearch={async () => {
-                        const path = await importResolvePath();
-                        if (path){
-                          setPathStateValue(path);
-                          addImportPath(path, importPaths, onImportsChange);
-                        }
-                      }}
-                    />
-                ) : (
-                    <span>{record.value}</span>
-                )}
-                </>
-            );
-          }}
-        />
-
-        <Table.Column
-            title=""
-            key={"actionColumn"}
-            render={(text, path: TablePath) => (
-                <>
-                  {path.value ? (
-                      <Tooltip placement="top" title="Remove">
-                        <Icon
-                            type="close"
-                            style={{fontSize: 16, cursor: "pointer", marginTop: 5}}
-                            onClick={() => removePath(path.value, importPaths, onImportsChange)}
-                        />
-                      </Tooltip>
-                  ) : (
-                      <Tooltip placement="top" title="Add">
-                        <Icon
-                            style={{color: '#28d440', fontSize: 18, cursor: "pointer", marginTop: 5}}
-                            type="plus"
-                            onClick={() => {
-                              const pathAdded = addImportPath(pathValue, importPaths, onImportsChange);
-                              if (pathAdded) {
-                                setPathStateValue("");
-                              }
-                            }}
-                        />
-                      </Tooltip>
-                  )}
-                </>
-            )}
-        />
-      </Table>
-    </div>
+    <CardList>
+      {
+        importPaths.sort().map((importPath) => (
+          <Card key={importPath} style={{ display: 'flex', flexDirection: 'row' }}>
+            <Text style={{ flex: 1 }}>{importPath}</Text>
+            <Button minimal intent='danger' icon='delete' onClick={() => {
+              removePath(importPath, importPaths, onImportsChange);
+            }} />
+          </Card>
+        ))
+      }
+    </CardList>
   );
 }
 
-function addImportPath(
+export function addImportPath(
   path: string,
   importPaths: string[],
   setImportPath?: (path: string[]) => void,

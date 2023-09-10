@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from "react";
 import { Badge } from '../Badge/Badge';
-import {OnProtoUpload, ProtoFile, ProtoService, importProtos} from '../../behaviour';
-import { PathResolution } from "./PathResolution";
+import {OnProtoUpload, ProtoFile, ProtoService, importProtos, importResolvePath} from '../../behaviour';
+import { PathResolution, addImportPath } from "./PathResolution";
 import { getImportPaths } from "../../storage";
 import { strcmp } from '../../utils';
 import {
@@ -112,7 +112,14 @@ export function Sidebar({ protos, onMethodSelected, onProtoUpload, onDeleteAll, 
             <PathResolution onImportsChange={setImportPaths} importPaths={importPaths} />
           </DialogBody>
           <DialogFooter actions={(
-            <Button text="Close" onClick={() => setImportPathsVisible(false)}/>
+            <>
+              <Button text="Add" intent="primary" onClick={async () => {
+                const path = await importResolvePath();
+                if (!path) return;
+                addImportPath(path, importPaths, setImportPaths);
+              }} />
+              <Button text="Close" onClick={() => setImportPathsVisible(false)} />
+            </>
           )} />
       </Dialog>
 
