@@ -16,13 +16,15 @@ export function Badge({ type, children }: BadgeProps) {
   )
 }
 
-const styles: {[key: string]: any} = {
+const styles = {
   badge: {
-    lineHeight: "15px",
     fontSize: "11px",
-    marginTop: "5px",
-    marginRight: "7px",
-    paddingBottom: "1px",
+    aspectRatio: "1/1",
+    height: '15px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex',
+    marginRight: '0.3em',
   },
   protoFile: {
     backgroundColor: "#15abff",
@@ -36,4 +38,4 @@ const styles: {[key: string]: any} = {
     backgroundColor: "#2cc316",
     color: "#fff",
   },
-};
+} as const;
