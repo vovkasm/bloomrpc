@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Layout, notification } from 'antd';
 import arrayMove from 'array-move';
 import { Sidebar } from './Sidebar';
 import { TabData, TabList } from './TabList';
@@ -19,6 +18,7 @@ import {
 import { EditorEnvironment } from "./Editor";
 import { getEnvironments } from "../storage/environments";
 import { v4 as uuidv4 } from 'uuid';
+import { toaster } from '../toaster';
 
 export interface EditorTabs {
   activeKey: string
@@ -26,7 +26,6 @@ export interface EditorTabs {
 }
 
 export function BloomRPC() {
-
   const [protos, setProtosState] = useState<ProtoFile[]>([]);
   const [editorTabs, setEditorTabs] = useState<EditorTabs>({
     activeKey: "0",
@@ -52,9 +51,8 @@ export function BloomRPC() {
   }, []);
 
   return (
-    <Layout style={styles.layout}>
-      <Layout>
-        <Layout.Sider style={styles.sider} width={ 300 }>
+    <div style={styles.layout}>
+        <aside style={styles.sider}>
           <Sidebar
             protos={protos}
             onProtoUpload={handleProtoUpload(setProtos, protos)}
@@ -67,9 +65,9 @@ export function BloomRPC() {
             }}
             onMethodDoubleClick={handleMethodDoubleClick(editorTabs, setTabs)}
           />
-        </Layout.Sider>
+        </aside>
 
-        <Layout.Content>
+        <main style={styles.content}>
           <TabList
             tabs={editorTabs.tabs || []}
             onDragEnd={({oldIndex, newIndex}) => {
@@ -126,10 +124,8 @@ export function BloomRPC() {
               })
             }}
           />
-        </Layout.Content>
-      </Layout>
-
-    </Layout>
+        </main>
+    </div>
   );
 }
 
@@ -215,16 +211,11 @@ async function loadTabs(editorTabs: EditorTabsStorage): Promise<EditorTabs> {
 function handleProtoUpload(setProtos: React.Dispatch<ProtoFile[]>, protos: ProtoFile[]) {
   return function (newProtos: ProtoFile[], err: Error | void) {
     if (err) {
-      notification.error({
-        message: "Error while importing protos",
-        description: err.message,
-        duration: 5,
-        placement: "bottomLeft",
-        style: {
-          width: "89%",
-          wordBreak: "break-all",
-        }
-      });
+      toaster.show({
+        intent: 'danger',
+        message: `Error while importing protos: ${err.message}`,
+        icon: 'cross-circle',
+      })
       setProtos([]);
       return;
     }
@@ -293,19 +284,18 @@ function handleMethodDoubleClick(editorTabs: EditorTabs, setTabs: React.Dispatch
 
 const styles = {
   layout: {
-    height: "100vh"
-  },
-  header: {
-    color: "#fff",
-    fontWeight: 900,
-    fontSize: 20,
-    display: "flex",
-    justifyContent: "space-between",
+    display: 'flex',
+    height: "100vh",
+    flexDirection: 'row',
   },
   sider: {
+    width: '300px',
     zIndex: 20,
     borderRight: "1px solid rgba(0, 21, 41, 0.18)",
     backgroundColor: "white",
     boxShadow: "3px 0px 4px 0px rgba(0,0,0,0.10)",
   },
-};
+  content: {
+    flex: 1,
+  }
+} as const;
