@@ -1,5 +1,5 @@
 // @ts-ignore
-import * as lodashGet from 'lodash.get';
+import lodashGet from 'lodash.get';
 import { ProtoService } from './protobuf';
 
 
