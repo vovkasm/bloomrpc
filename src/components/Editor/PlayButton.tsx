@@ -12,6 +12,7 @@ import {
 } from './actions';
 import { ControlsStateProps } from './Controls';
 import { GRPCEventType, GRPCRequest, ResponseMetaInformation, GRPCEventEmitter, GRPCWebRequest } from '../../behaviour';
+import { castToError } from '../..//utils';
 
 export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
@@ -93,7 +94,8 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
 
   try {
     grpcRequest.send();
-  } catch(e) {
+  } catch (mayBeError) {
+    const e = castToError(mayBeError);
     console.error(e);
     notification.error({
       message: "Error constructing the request",

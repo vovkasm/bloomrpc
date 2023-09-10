@@ -311,21 +311,21 @@ export class GRPCRequest extends EventEmitter {
 
     try {
       inputs = JSON.parse(data || "{}")
-    } catch (e) {
-      e.message = "Couldn't parse JSON inputs Invalid json";
+    } catch (mayBeError) {
+      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError })
       this.emit(GRPCEventType.ERROR, e, {});
       this.emit(GRPCEventType.END);
-      throw new Error(e);
+      throw e;
     }
 
     if (userMetadata) {
       try {
         metadata = JSON.parse(userMetadata || "{}")
-      } catch (e) {
-        e.message = "Couldn't parse JSON metadata Invalid json";
+      } catch (mayBeError) {
+        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError })
         this.emit(GRPCEventType.ERROR, e, {});
         this.emit(GRPCEventType.END);
-        throw new Error(e);
+        throw e;
       }
     }
 
@@ -530,21 +530,21 @@ export class GRPCWebRequest extends EventEmitter {
 
     try {
       inputs = JSON.parse(data || "{}")
-    } catch (e) {
-      e.message = "Couldn't parse JSON inputs Invalid json";
+    } catch (mayBeError) {
+      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError })
       this.emit(GRPCEventType.ERROR, e, {});
       this.emit(GRPCEventType.END);
-      throw new Error(e);
+      throw e;
     }
 
     if (userMetadata) {
       try {
         metadata = JSON.parse(userMetadata || "{}")
-      } catch (e) {
-        e.message = "Couldn't parse JSON metadata Invalid json";
+      } catch (mayBeError) {
+        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError })
         this.emit(GRPCEventType.ERROR, e, {});
         this.emit(GRPCEventType.END);
-        throw new Error(e);
+        throw e;
       }
     }
 

@@ -6,6 +6,7 @@ import * as loader from '@grpc/proto-loader';
 import * as grpc from '@grpc/grpc-js';
 import * as protobuf from 'protobufjs';
 import { v4 as uuidv4 } from 'uuid'
+import { castToError } from '../utils';
 
 const commonProtosPath = [
   path.join(path.join(__dirname, '../..')),
@@ -91,7 +92,8 @@ export async function loadProtosFromFile(filePaths: string[], importPaths?: stri
     onProtoUploaded && onProtoUploaded(protoList, undefined);
     return protoList;
 
-  } catch (e) {
+  } catch (mayBeError) {
+    const e = castToError(mayBeError);
     console.error(e);
     onProtoUploaded && onProtoUploaded([], e);
 

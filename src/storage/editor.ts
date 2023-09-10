@@ -9,7 +9,7 @@ type EditorStorage = {
   url: string,
   protos: string[],
   tabs: EditorTabsStorage,
-  requests: EditorRequest[],
+  requests: TabRequestInfo[],
   metadata: string,
 };
 
@@ -85,7 +85,7 @@ export interface EditorTabsStorage {
 /**
  * Get tabs
  */
-export function getTabs(): EditorTabsStorage | void {
+export function getTabs(): EditorTabsStorage | undefined {
   return EditorStore.get(KEYS.TABS);
 }
 

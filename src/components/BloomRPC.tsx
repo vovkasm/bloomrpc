@@ -139,7 +139,7 @@ export function BloomRPC() {
  * @param setEditorTabs
  */
 async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTabs: React.Dispatch<EditorTabs>): Promise<void> {
-  const tasks: Array<Promise<any>> = [];
+  const tasks: Array<Promise<boolean>> = [];
   const savedProtos = getProtos();
   const importPaths = getImportPaths();
 
@@ -151,12 +151,16 @@ async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTa
 
     const savedEditorTabs = getTabs();
     if (savedEditorTabs) {
-      tasks.push(
-        loadTabs(savedEditorTabs)
-          .catch(() => setEditorTabs({activeKey: "0", tabs: []}))
-          .then(setEditorTabs)
-          .then(() => true)
-      );
+      const task = async () => {
+        try {
+          const tabs = await loadTabs(savedEditorTabs);
+          setEditorTabs(tabs);
+        } catch (_) {
+          setEditorTabs({activeKey: "0", tabs: []});
+        }
+        return true;
+      };
+      tasks.push(task());
     }
   }
 

@@ -13,7 +13,7 @@ interface OptionsProps {
   grpcWebChecked: boolean
   onInteractiveChange?: (chcked: boolean) => void
   tlsSelected?: Certificate
-  onTLSSelected?: (selected: Certificate) => void
+  onTLSSelected?: (selected?: Certificate) => void
   onClickExport?: () => void
 }
 

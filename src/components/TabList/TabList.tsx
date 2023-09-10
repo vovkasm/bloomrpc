@@ -11,7 +11,7 @@ interface TabListProps {
   tabs: TabData[]
   activeKey?: string
   onChange?: (activeKey: string) => void
-  onDelete?: (activeKey: string | React.MouseEvent<HTMLElement>) => void
+  onDelete?: (activeKey: string) => void
   onEditorRequestChange?: (requestInfo: EditorTabRequest) => void
   onDragEnd: (indexes: {oldIndex: number, newIndex: number}) => void
   environmentList?: EditorEnvironment[],
@@ -54,7 +54,7 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
     <Tabs
       className={"draggable-tabs"}
       onEdit={(targetKey, action) => {
-        if (action === "remove") {
+        if (action === "remove" && typeof targetKey === 'string') {
           onDelete && onDelete(targetKey);
         }
       }}
