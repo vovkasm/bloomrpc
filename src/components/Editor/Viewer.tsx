@@ -13,19 +13,26 @@ interface ResponseProps {
 
 export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
-  const editorRef: any = useRef(null);
-  const inputSearch: any = useRef(null);
+  const editorRef = useRef<AceEditor>(null);
+  const inputSearch = useRef<Input>(null);
   const [showFind, setShowFind] = useState(false);
 
+  const doShowFind = () => {
+    const nextShowFind = !showFind;
+    setShowFind(nextShowFind);
+    if (nextShowFind) {
+      inputSearch.current?.focus();
+    }
+  }
+
   useEffect(() => {
-    Mousetrap.bindGlobal(['command+f', 'ctrl+f'], () => {
-      setShowFind(!showFind);
+    Mousetrap.bindGlobal('mod+f', () => {
+      doShowFind();
       return false;
     });
 
     return () => {
-      Mousetrap.unbind(['command+f', 'ctrl+f'], 'keyup');
-      Mousetrap.unbind(['command+f', 'ctrl+f'], 'keydown');
+      Mousetrap.unbind('mod+f');
     }
   });
 
@@ -34,11 +41,10 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
       <Input
         ref={inputSearch}
         name="search"
-        autoFocus={showFind}
         className={`find-match ${!showFind ? 'hide' : ''}`}
         placeholder={"Search match"}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          editorRef.current.editor.findAll(e.target.value, {
+          editorRef.current?.editor.findAll(e.target.value, {
             backwards: false,
             wrap: true,
             caseSensitive: false,
@@ -79,10 +85,7 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
           commands={[{
             name: 'find',
             bindKey: { win: 'Ctrl-f', mac: 'Command-f' }, //key combination used for the command.
-            exec: () => {
-              setShowFind(!showFind);
-              inputSearch.current.focus();
-            }
+            exec: () => doShowFind()
           }]}
           setOptions={{
             useWorker: false,

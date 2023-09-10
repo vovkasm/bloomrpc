@@ -38,7 +38,7 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
     : [...tabsWithMatchingKey.map(tab => tab.tabKey)].pop();
 
   useEffect(() => {
-    Mousetrap.bindGlobal(['command+w', 'ctrl+w'], () => {
+    Mousetrap.bindGlobal('mod+w', () => {
       if (tabActiveKey) {
         onDelete && onDelete(tabActiveKey);
       }
@@ -46,9 +46,9 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
     });
 
     return () => {
-      Mousetrap.unbind(['command+w', 'ctrl+w']);
+      Mousetrap.unbind('mod+w');
     }
-  });
+  }, [onDelete, tabActiveKey]);
 
   return (
     <Tabs
