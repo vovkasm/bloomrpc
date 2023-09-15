@@ -1,6 +1,7 @@
 import * as React from 'react';
 import AceEditor, { ICommand } from 'react-ace';
-import { Tabs } from 'antd';
+import { Tab, Tabs } from '@blueprintjs/core';
+
 import { Viewer } from './Viewer';
 
 interface RequestProps {
@@ -30,39 +31,44 @@ export function Request({onChangeData, commands, data, streamData, active}: Requ
   return (
     <>
       <Tabs
-        defaultActiveKey={editorTabKey}
-        tabPosition={"top"}
-        style={{width: "100%"}}
+        id="request-tabs"
+        defaultSelectedTabId={editorTabKey}
       >
-        <Tabs.TabPane tab="Editor" key={editorTabKey}>
-          <AceEditor
-            ref={aceEditor}
-            style={{ background: "#fff" }}
-            width={"100%"}
-            height={"calc(100vh - 185px)"}
-            mode="json"
-            theme="textmate"
-            name="inputs"
-            fontSize={13}
-            cursorStart={2}
-            onChange={onChangeData}
-            commands={commands}
-            showPrintMargin={false}
-            showGutter
-            highlightActiveLine={false}
-            value={data}
-            setOptions={{
-              useWorker: false,
-              displayIndentGuides: true
-            }}
-            tabSize={2}
-          />
-        </Tabs.TabPane>
+        <Tab
+          id={editorTabKey}
+          key={editorTabKey}
+          title="Editor"
+          panel={
+            <AceEditor
+              ref={aceEditor}
+              style={{ background: "#fff" }}
+              width={"100%"}
+              height={"calc(100vh - 185px)"}
+              mode="json"
+              theme="textmate"
+              name="inputs"
+              fontSize={13}
+              cursorStart={2}
+              onChange={onChangeData}
+              commands={commands}
+              showPrintMargin={false}
+              showGutter
+              highlightActiveLine={false}
+              value={data}
+              setOptions={{
+                useWorker: false,
+                displayIndentGuides: true
+              }}
+              tabSize={2}
+            />
+          }
+          panelClassName='bl-editor-tab-panel'
+        />
 
         {streamData.map((data, key) => (
-          <Tabs.TabPane tab={`Stream ${key + 1}`} key={`${key}`}>
+          <Tab id={`${key}`} key={`${key}`} title={`Stream ${key + 1}`} panel={
             <Viewer output={data} />
-          </Tabs.TabPane>
+          } />
         ))}
       </Tabs>
     </>

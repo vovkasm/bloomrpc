@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Tabs } from 'antd';
+import { Tab, Tabs } from '@blueprintjs/core';
+
 import { Viewer } from './Viewer';
 import { EditorResponse } from "./Editor";
 
@@ -15,33 +16,40 @@ export function Response({response, streamResponse}: ResponseProps) {
   return (
     <>
       <Tabs
-        defaultActiveKey={defaultKey}
-        tabPosition={"top"}
-        style={{width: "100%", height: "height: calc(100vh - 181px)"}}
+        id="response-tabs"
+        defaultSelectedTabId={defaultKey}
+        className='bl-editor-tabs'
       >
         {streamResponse.length === 0 && (
-          <Tabs.TabPane tab={"Response"} key={"unaryResponse"}>
+          <Tab
+            title={"Response"}
+            id={defaultKey}
+            key={defaultKey}
+            panel={
               <Viewer
-                  output={response.output}
-                  responseTime={response.responseTime}
-                  emptyContent={(
-                    <div style={{position: "relative", height: "325px"}}>
-                      <div style={styles.introContainer}>
-                        <img src={bluePng} style={{ opacity: 0.1, pointerEvents: "none", userSelect: "none" }}/>
-                        <h1 style={styles.introTitle}>Hit the play button to get a response here</h1>
-                      </div>
+                output={response.output}
+                responseTime={response.responseTime}
+                emptyContent={(
+                  <div style={{position: "relative", height: "325px"}}>
+                    <div style={styles.introContainer}>
+                      <img src={bluePng} style={{ opacity: 0.1, pointerEvents: "none", userSelect: "none" }}/>
+                      <h1 style={styles.introTitle}>Hit the play button to get a response here</h1>
                     </div>
+                  </div>
                 )}
               />
-          </Tabs.TabPane>
+            }
+            panelClassName='bl-editor-tab-panel'
+          />
         )}
         {streamResponse.map((data, key) => (
-          <Tabs.TabPane tab={`Stream ${key + 1}`} key={`response-${key}`}>
-            <Viewer
-                output={data.output}
-                responseTime={data.responseTime}
-            />
-          </Tabs.TabPane>
+          <Tab
+            title={`Stream ${key + 1}`}
+            id={`response-${key}`}
+            key={`response-${key}`}
+            panel={<Viewer output={data.output} responseTime={data.responseTime} />}
+            panelClassName='bl-editor-tab-panel'
+          />
         ))}
       </Tabs>
     </>

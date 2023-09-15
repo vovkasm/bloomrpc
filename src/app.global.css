@@ -129,3 +129,11 @@ html, body {
   margin-top: 20px;
   margin-left: 0px !important;
 }
+
+.bl-editor-tabs {
+  flex: 1;
+}
+
+.bl-editor-tab-panel {
+  margin-top: 0;
+}
