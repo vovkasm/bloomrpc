@@ -1,6 +1,5 @@
 import * as React from 'react';
 import AceEditor from 'react-ace';
-import { Input } from 'antd';
 import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 
 interface ResponseProps {
@@ -12,7 +11,7 @@ interface ResponseProps {
 export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
   const editorRef = React.useRef<AceEditor>(null);
-  const inputSearch = React.useRef<Input>(null);
+  const inputSearch = React.useRef<HTMLInputElement>(null);
   const [showFind, setShowFind] = React.useState(false);
 
   const doShowFind = React.useCallback(() => {
@@ -38,10 +37,10 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
   return (
     <div style={styles.responseContainer}>
-      <Input
+      <input
         ref={inputSearch}
         name="search"
-        className={`find-match ${!showFind ? 'hide' : ''}`}
+        className={`bp5-input find-match ${!showFind ? 'hide' : ''}`}
         placeholder={"Search match"}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editorRef.current?.editor.findAll(e.target.value, {

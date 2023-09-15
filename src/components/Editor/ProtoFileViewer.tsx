@@ -1,7 +1,8 @@
-import * as React from 'react';
+import React from 'react';
 import AceEditor from 'react-ace';
-import { Drawer } from 'antd';
+
 import { ProtoInfo } from '../../behaviour';
+import { Drawer } from '@blueprintjs/core';
 
 
 interface ProtoFileViewerProps {
@@ -15,11 +16,9 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
   return (
     <Drawer
       title={protoInfo.service.proto.fileName.split('/').pop()}
-      placement={"right"}
-      width={"50%"}
-      closable={false}
+      position={"right"}
       onClose={onClose}
-      visible={visible}
+      isOpen={visible}
     >
       <AceEditor
         style={{ marginTop: "10px", background: "#fff" }}
@@ -31,7 +30,6 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
         fontSize={13}
         showPrintMargin={false}
         wrapEnabled
-
         showGutter={false}
         readOnly
         highlightActiveLine={false}
