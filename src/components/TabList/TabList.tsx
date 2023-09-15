@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { useEffect } from 'react';
-import { Tabs } from 'antd';
+import { HotkeyConfig, Tab, Tabs, useHotkeys } from '@blueprintjs/core';
+
 import { Editor, EditorEnvironment, EditorRequest } from '../Editor';
 import { ProtoInfo, ProtoService } from '../../behaviour';
-import { DraggableItem, DraggableTabs } from "./DraggableTabList";
-import * as Mousetrap from 'mousetrap';
-import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
+import ss from './TabList.module.scss';
 
 interface TabListProps {
   tabs: TabData[]
@@ -13,7 +11,6 @@ interface TabListProps {
   onChange?: (activeKey: string) => void
   onDelete?: (activeKey: string) => void
   onEditorRequestChange?: (requestInfo: EditorTabRequest) => void
-  onDragEnd: (indexes: {oldIndex: number, newIndex: number}) => void
   environmentList?: EditorEnvironment[],
   onEnvironmentChange?: () => void
 }
@@ -29,7 +26,7 @@ export interface EditorTabRequest extends EditorRequest {
   id: string
 }
 
-export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEditorRequestChange, environmentList, onEnvironmentChange }: TabListProps) {
+export function TabList({ tabs, activeKey, onChange, onDelete, onEditorRequestChange, environmentList, onEnvironmentChange }: TabListProps) {
   const tabsWithMatchingKey =
     tabs.filter(tab => tab.tabKey === activeKey);
 
@@ -37,21 +34,57 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
     ? [...tabs.map(tab => tab.tabKey)].pop()
     : [...tabsWithMatchingKey.map(tab => tab.tabKey)].pop();
 
-  useEffect(() => {
-    Mousetrap.bindGlobal('mod+w', () => {
+  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
+    label: 'Close current tab',
+    combo: 'mod+w',
+    global: true,
+    preventDefault: true,
+    onKeyDown: () => {
       if (tabActiveKey) {
         onDelete && onDelete(tabActiveKey);
       }
       return false;
-    });
+    },
+  }], [tabActiveKey, onDelete]);
 
-    return () => {
-      Mousetrap.unbind('mod+w');
-    }
-  }, [onDelete, tabActiveKey]);
+  useHotkeys(hotkeys);
 
   return (
-    <Tabs
+    <>
+      <Tabs
+        className={ss.mainTabs}
+        selectedTabId={tabActiveKey}
+        onChange={onChange}
+        animate={false}
+      >
+        {
+          tabs.map((tab, index) => {
+            return (
+              <Tab
+                id={tab.tabKey}
+                key={tab.tabKey}
+                title={
+                  `${tab.service.serviceName}.${tab.methodName}`
+                }
+                panel={
+                  <Editor
+                    key={tab.tabKey}
+                    active={tab.tabKey === activeKey}
+                    environmentList={environmentList}
+                    protoInfo={new ProtoInfo(tab.service, tab.methodName)}
+                    initialRequest={tab.initialRequest}
+                    onEnvironmentListChange={onEnvironmentChange}
+                    onRequestChange={(editorRequest) => {
+                      onEditorRequestChange && onEditorRequestChange({ id: tab.tabKey, ...editorRequest });
+                    }}
+                  />
+                }
+              />
+            )
+          })
+        }
+      </Tabs>
+    {/* <AntTabs
       className={"draggable-tabs"}
       onEdit={(targetKey, action) => {
         if (action === "remove" && typeof targetKey === 'string') {
@@ -93,7 +126,7 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
       }}
     >
       {tabs.length === 0 ? (
-        <Tabs.TabPane
+        <AntTabs.TabPane
           tab={"New Tab"}
           key={"0"}
           closable={false}
@@ -104,9 +137,9 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
             environmentList={environmentList}
             onEnvironmentListChange={onEnvironmentChange}
           />
-        </Tabs.TabPane>
+        </AntTabs.TabPane>
       ) : tabs.map((tab) => (
-          <Tabs.TabPane
+          <AntTabs.TabPane
             tab={`${tab.service.serviceName}.${tab.methodName}`}
             key={tab.tabKey}
             closable={true}
@@ -126,18 +159,19 @@ export function TabList({ tabs, activeKey, onChange, onDelete, onDragEnd, onEdit
                 })
               }}
             />
-          </Tabs.TabPane>
+          </AntTabs.TabPane>
       ))}
-    </Tabs>
+    </AntTabs> */}
+    </>
   );
 }
 
-const styles = {
-  tabList: {
-    height: "100%"
-  },
-  tabBarStyle: {
-    padding: "10px 0px 0px 20px",
-    marginBottom: "0px",
-  }
-};
+// const styles = {
+//   tabList: {
+//     height: "100%"
+//   },
+//   tabBarStyle: {
+//     padding: "10px 0px 0px 20px",
+//     marginBottom: "0px",
+//   }
+// };

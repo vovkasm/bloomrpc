@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import arrayMove from 'array-move';
 import { Sidebar } from './Sidebar';
 import { TabData, TabList } from './TabList';
 import {loadProtos, ProtoFile, ProtoService} from '../behaviour';
@@ -70,18 +69,6 @@ export function BloomRPC() {
         <main style={styles.content}>
           <TabList
             tabs={editorTabs.tabs || []}
-            onDragEnd={({oldIndex, newIndex}) => {
-              const newTab = editorTabs.tabs[oldIndex];
-
-              setTabs({
-                activeKey: newTab && newTab.tabKey || editorTabs.activeKey,
-                tabs: arrayMove(
-                    editorTabs.tabs,
-                    oldIndex,
-                    newIndex,
-                ).filter(e => e),
-              })
-            }}
             activeKey={editorTabs.activeKey}
             environmentList={environments}
             onEnvironmentChange={() => {
@@ -299,5 +286,7 @@ const styles = {
   },
   content: {
     flex: 1,
+    position: 'relative',
+    minWidth: 0,
   }
 } as const;

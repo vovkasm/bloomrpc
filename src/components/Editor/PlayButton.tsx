@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Icon, notification } from 'antd';
-import * as Mousetrap from 'mousetrap'
-import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
+import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 import {
   setCall,
   setIsLoading,
@@ -112,22 +111,31 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
 };
 
 export function PlayButton({ dispatch, state, protoInfo, active }: ControlsStateProps) {
-  React.useEffect(() => {
-    Mousetrap.bindGlobal('mod+enter', () => {
-      if (!active || state.loading) return;
+  // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
+  // introducing models layer
+  const run = React.useCallback(() => {
+    makeRequest({ dispatch, state, protoInfo })
+  }, [makeRequest, dispatch, state]);
 
-      makeRequest({ dispatch, state, protoInfo })
-    })
-    return () => {
-      Mousetrap.unbind('mod+enter');
+  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
+    label: 'Run request',
+    combo: 'mod+enter',
+    allowInInput: true,
+    global: true,
+    onKeyDown: () => {
+      if (!active || state.loading) return;
+      run();
+      return false;
     }
-  }, [dispatch, state, protoInfo, active])
+  }], [active, state.loading, run]);
+
+  useHotkeys(hotkeys);
 
   return (
     <Icon
       type={state.loading ? "pause-circle" : "play-circle"}
       theme="filled" style={{ ...styles.playIcon, ...(state.loading ? { color: "#ea5d5d" } : {}) }}
-      onClick={() => makeRequest({ dispatch, state, protoInfo })}
+      onClick={run}
     />
   )
 }

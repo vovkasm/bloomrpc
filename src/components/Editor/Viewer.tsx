@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import AceEditor from 'react-ace';
-import * as Mousetrap from 'mousetrap';
-import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 import { Input } from 'antd';
+import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 
 interface ResponseProps {
   output: string,
@@ -13,28 +11,30 @@ interface ResponseProps {
 
 export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
 
-  const editorRef = useRef<AceEditor>(null);
-  const inputSearch = useRef<Input>(null);
-  const [showFind, setShowFind] = useState(false);
+  const editorRef = React.useRef<AceEditor>(null);
+  const inputSearch = React.useRef<Input>(null);
+  const [showFind, setShowFind] = React.useState(false);
 
-  const doShowFind = () => {
+  const doShowFind = React.useCallback(() => {
     const nextShowFind = !showFind;
     setShowFind(nextShowFind);
     if (nextShowFind) {
       inputSearch.current?.focus();
     }
-  }
+  }, [showFind, setShowFind, inputSearch]);
 
-  useEffect(() => {
-    Mousetrap.bindGlobal('mod+f', () => {
+  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
+    label: 'Toggle response search',
+    combo: 'mod+f',
+    allowInInput: true,
+    global: true,
+    onKeyDown: () => {
       doShowFind();
       return false;
-    });
-
-    return () => {
-      Mousetrap.unbind('mod+f');
     }
-  });
+  }], [doShowFind]);
+
+  useHotkeys(hotkeys);
 
   return (
     <div style={styles.responseContainer}>
@@ -43,7 +43,7 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
         name="search"
         className={`find-match ${!showFind ? 'hide' : ''}`}
         placeholder={"Search match"}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editorRef.current?.editor.findAll(e.target.value, {
             backwards: false,
             wrap: true,

@@ -1,0 +1,23 @@
+@import "node_modules/@blueprintjs/core/lib/scss/variables.scss";
+
+.mainTabs {
+  :global .bp5-tab-list {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  :global .bp5-tab-list::-webkit-scrollbar {
+    display: none;
+  }
+  // :global .bp5-tab {
+  //   /* reset bp5 */
+  //   box-shadow: none;
+  //   border-top: $pt-text-color-disabled 1px solid;
+  //   border-left: $pt-text-color-disabled 1px solid;
+  //   border-right: $pt-text-color-disabled 1px solid;
+  // }
+  // :global .bp5-tab[aria-selected=true] {
+  //   border-top: $pt-intent-primary 1px solid;
+  //   border-left: $pt-intent-primary 1px solid;
+  //   border-right: $pt-intent-primary 1px solid;
+  // }
+}
