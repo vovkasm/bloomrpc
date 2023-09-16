@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { Button, Icon, Tooltip, Switch, Modal, Menu, Dropdown } from 'antd';
+import React from 'react';
+import { Button, Dialog, DialogBody, Icon, Menu, MenuItem, Popover, Switch, Tooltip } from '@blueprintjs/core';
+
 import { setInteractive, setProtoVisibility, setGrpcWeb } from './actions';
 import { EditorAction } from './Editor';
-import {useState} from "react";
 import {TLSManager} from "./TLSManager";
 import { ProtoInfo, Certificate } from '../../behaviour';
 
@@ -19,7 +19,7 @@ interface OptionsProps {
 
 export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecked, onInteractiveChange, tlsSelected, onTLSSelected, onClickExport }: OptionsProps) {
 
-  const [tlsModalVisible, setTlsModalVisible] = useState(false);
+  const [tlsModalVisible, setTlsModalVisible] = React.useState(false);
 
   return (
     <div style={{...styles.optionContainer, ...styles.inline}}>
@@ -29,13 +29,11 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
             display: "flex",
             alignItems: "center",
           }}>
-            <Tooltip placement="bottom" title={tlsSelected ? "Secure Connection" : "Unsecure Connection"}>
+            <Tooltip placement="bottom" content={tlsSelected ? "Secure Connection" : "Unsecure Connection"}>
               <Icon
-                  type={tlsSelected ? "lock" : "unlock"}
-                  style={{
-                    fontSize: 18,
-                    color: tlsSelected ? "#28d440" : "#bdbcbc",
-                  }}
+                  icon={tlsSelected ? "lock" : "unlock"}
+                  size={18}
+                  color={tlsSelected ? "#28d440" : "#bdbcbc"}
               />
             </Tooltip>
             <span
@@ -46,72 +44,65 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
             </span>
           </div>
 
-          <Modal
-              title={(
-                  <div>
-                    <Icon type="lock" />
-                    <span style={{marginLeft: 10}}> TLS / SSL Manager </span>
-                  </div>
-              )}
-              visible={tlsModalVisible}
-              onCancel={() => setTlsModalVisible(false)}
-              onOk={() => setTlsModalVisible(false)}
-              bodyStyle={{padding: 0}}
-              width={750}
-              okText={"Done"}
-              cancelText={"Close"}
+          <Dialog
+            title="TLS / SSL Manager"
+            icon="key"
+            isOpen={tlsModalVisible}
+            onClose={() => {
+              setTlsModalVisible(false);
+            }}
+            style={{ minWidth: '80%' }}
           >
-            <TLSManager
-                selected={tlsSelected}
-                onSelected={onTLSSelected}
-            />
-          </Modal>
+            <DialogBody>
+              <TLSManager selected={tlsSelected} onSelected={onTLSSelected} />
+            </DialogBody>
+          </Dialog>
       </div>
 
       <div style={{ ...styles.inline }}>
-        <Dropdown overlay={(
+        <Popover content={(
             <Menu>
-              <Menu.Item key="0">
-                <a onClick={(e) => {
+              <MenuItem key="0" text="Export response" onClick={(e) => {
                   e.preventDefault();
                   onClickExport && onClickExport()
-                }}>Export response</a>
-              </Menu.Item>
+              }} />
             </Menu>
-        )} trigger={['click']}>
+        )} interactionKind='click' placement='bottom'>
           <div style={{ marginRight: 5, marginTop: 2, cursor: 'pointer', color: "#b5b5b5"}} >
-            <Icon type="caret-down" />
+            <Icon icon="caret-down" />
           </div>
-        </Dropdown>
+        </Popover>
         <div style={{paddingRight: 10}}>
           <Switch
-            checkedChildren="WEB &nbsp;"
+            large
+            innerLabel="GRPC"
+            innerLabelChecked="WEB"
             defaultChecked={grpcWebChecked}
-            unCheckedChildren="GRPC"
-            onChange={(checked) => {
-              dispatch(setGrpcWeb(checked));
+            onChange={(ev) => {
+              dispatch(setGrpcWeb((ev.target as HTMLInputElement).checked));
             }}
           />
         </div>
         <div style={{paddingRight: 10}}>
           <Switch
-            checkedChildren="Interactive"
+            large
+            innerLabel="Manual"
+            innerLabelChecked="Interactive"
             defaultChecked={interactiveChecked}
-            unCheckedChildren="Manual &nbsp; &nbsp; &nbsp;"
-            onChange={(checked) => {
-              dispatch(setInteractive(checked));
-              onInteractiveChange && onInteractiveChange(checked);
+            onChange={(ev) => {
+              const el = ev.target as HTMLInputElement;
+              dispatch(setInteractive(el.checked));
+              onInteractiveChange && onInteractiveChange(el.checked);
             }}
           />
         </div>
 
         <Button
-          icon="file-ppt"
-          type="dashed"
+          icon="code"
+          outlined
+          text='View Proto'
           onClick={() => dispatch(setProtoVisibility(true))}
-        >
-          View Proto
-        </Button>
+        />
       </div>
     </div>
   )

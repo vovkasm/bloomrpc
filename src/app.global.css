@@ -1,7 +1,6 @@
 @import "normalize.css";
 @import "@blueprintjs/core/lib/css/blueprint.css";
 @import "@blueprintjs/icons/lib/css/blueprint-icons.css";
-@import 'antd/dist/antd.css';
 
 html, body {
   overflow-y: hidden;
@@ -15,45 +14,9 @@ html, body {
   background: #fff !important;
 }
 
-.ant-tabs-tabpane-inactive {
-  height: 0px !important;
-}
-
-.ant-layout-content > .ant-tabs:not(.ant-tabs-vertical) > .ant-tabs-content {
-  height: 100%;
-  padding-bottom: 82px;
-}
-
-.ant-tabs-bar {
-  border-bottom: 0;
-}
-
-.ant-tabs.ant-tabs-card > .ant-tabs-bar .ant-tabs-tab {
-  background: #f1f1f1;
-}
-
 .hide {
   display: none;
 }
-
-.ant-tabs.ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active {
-  border: 1px solid rgba(0, 21, 41, 0.18);
-  border-bottom: 0;
-  color: #014f9a;
-  background: #fafafa;
-  box-shadow: 1px 0px 6px 1px rgba(0,0,0,0.15);
-
-}
-
-.ant-tabs-nav .ant-tabs-tab:hover {
-  color: #014f9a;
-}
-
-.ant-input-group-addon {
-  background: #001529;
-  color: #fff;
-}
-
 
 .response-edit .ace_gutter > .ace_layer {
   margin-left: -15px;
@@ -67,67 +30,12 @@ html, body {
   right: 0px;
 }
 
-.ant-drawer-header {
-  background: #001529;
-  border-radius: 0px;
-
-.ant-drawer-title {
-  color: #fff;
-  font-weight: 700;
-}
-}
-
-.ant-tabs-nav-scroll {
-  border-bottom: 1px solid rgb(238, 238, 238);
-}
-
-.ant-tabs-nav-wrap {
-  border-bottom: 1px solid rgb(238, 238, 238);
-}
-
-.ant-tabs-nav .ant-tabs-tab {
-  padding: 4px;
-  padding-left: 17px;
-  user-select: none;
-}
-
-.ant-tabs-nav .ant-tabs-tab-active {
-  border-bottom-color: #eee;
-  color: #014f9a;
-}
-
-.ant-tabs-bar {
-  margin: 0 0 8px 0;
-}
-
-.ant-tabs-ink-bar {
-  height: 0;
-}
-
 #metadata > .ace_gutter {
   background: #f0f2f5 !important;
 }
 
-.ant-modal-header {
-  background: #001529;
-  border-bottom: none; 
-}
-
-.ant-modal-header .ant-modal-title {
-  color: #fff;
-}
-
-.ant-modal-content .ant-modal-close-x {
-  color: #fff;
-}
-
 .inline-item {
     display: inline-block;
-}
-
-.env-modal .ant-modal-confirm-content {
-  margin-top: 20px;
-  margin-left: 0px !important;
 }
 
 .bl-editor-tabs {

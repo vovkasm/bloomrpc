@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { Button, Icon, Input, Radio, Table } from "antd";
+import { Button, HTMLTable, InputGroup, Radio } from '@blueprintjs/core';
+
 import { Certificate, importCertChain, importPrivateKey, importRootCert } from "../../behaviour";
 import { getTLSList, storeTLSList } from "../../storage";
 
@@ -10,169 +10,126 @@ interface TLSManagerProps {
 }
 
 export function TLSManager({ selected, onSelected }: TLSManagerProps) {
-    const [certs, setStateCerts] = useState<Certificate[]>([]);
+    const [certs, setStateCerts] = React.useState<Certificate[]>([]);
 
     function setCerts(newCerts: Certificate[]) {
       setStateCerts(newCerts);
       storeTLSList(newCerts);
     }
 
-    useEffect(() => {
+    React.useEffect(() => {
       setStateCerts(getTLSList());
     }, []);
 
     return (
         <>
-        <div>
-            <Button
-                type="primary"
-                onClick={async () => {
-                  const cert = await handleImportRootCert(certs, setCerts);
+          <Button
+              intent="primary"
+              fill
+              large
+              onClick={async () => {
+                const cert = await handleImportRootCert(certs, setCerts);
 
-                  if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                    onSelected && onSelected(cert);
-                  }
-                }}
-                style={{
-                    borderRadius: 0,
-                    width: "100%"
-                }}
-            >
-              <Icon type="plus-circle" /> Add Root Certificate
-            </Button>
-        </div>
-        <Table
-            dataSource={certs}
-            pagination={false}
-            rowKey={(certificate: Certificate) => certificate.rootCert.filePath}
-        >
-            <Table.Column
-                title={(
-                    <Radio
+                if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
+                  onSelected && onSelected(cert);
+                }
+              }}
+              icon="add"
+              text="Add Root Certificate"
+          />
+          <HTMLTable striped style={{ width: '100%' }}>
+            <thead>
+              <tr>
+                <th>
+                  <Radio name={"tls"} value={""} checked={!selected} onChange={() => onSelected && onSelected()} />
+                </th>
+                <th>Root Certificate</th>
+                <th>Private Key</th>
+                <th>Cert Chain</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                certs.map((certificate) => {
+                  return <tr key={certificate.rootCert.filePath}>
+                    <td>
+                      <Radio
                         name={"tls"}
-                        value={""}
-                        checked={!selected}
-                        onChange={() => onSelected && onSelected()}
-                    />
-                )}
-                key="radio"
-                render={(text, certificate: Certificate) => (
-                    <div>
-                        <Radio
-                            name={"tls"}
-                            value={certificate.rootCert.filePath}
-                            checked={selected && certificate.rootCert.filePath === selected.rootCert.filePath}
-                            onChange={() => onSelected && onSelected(certificate)}
-                        />
-                    </div>
-                )}
-            />
-            <Table.Column
-                title="Root Certificate"
-                key="rootCert"
-                render={(text, record: Certificate) => (
-                    <div>
-                        <span title={record.rootCert.filePath}>{record.rootCert.fileName}</span>
-                    </div>
-                )}
-            />
-            <Table.Column
-                title="Private Key"
-                key="privateKey"
-                render={(text, certificate: Certificate) => {
-                    const {privateKey} = certificate;
-                    if (certificate.useServerCertificate === true) {
-                      return <div>-</div>
-                    }
-                    return (
-                        <>
-                            {privateKey ? (
-                                <span>{privateKey.fileName}</span>
-                            ) : (
-                                <a onClick={async (e) => {
-                                  e.preventDefault();
-                                  const cert = await handleImportPrivateKey(certificate, certs, setCerts);
-                                  if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                                    onSelected && onSelected(cert);
-                                  }
-                                }}>Import Key</a>
-                            )}
-                        </>
-                    )
-                }}
-            />
-            <Table.Column
-                title="Cert Chain"
-                dataIndex="certChain"
-                key="certChain"
-                render={(text, certificate: Certificate) => {
-                    if (certificate.useServerCertificate === true) {
-                      return <div>-</div>
-                    }
-                    return (
-                        <>
-                            {certificate.certChain ? (
-                                <span title={certificate.certChain.filePath}>
-                                  {certificate.certChain.fileName}
-                                </span>
-                            ) : (
-                                <a onClick={async (e) => {
-                                  e.preventDefault();
-                                  const cert = await handleImportCertChain(certificate, certs, setCerts);
-                                  if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                                    onSelected && onSelected(cert);
-                                  }
-                                }}>Import Cert Chain</a>
-                            )}
-                        </>
-                    )
-                }}
-            />
-            <Table.Column
-              key="sslTarget"
-              render={(text, certificate: Certificate) => {
-                if(certificate.useServerCertificate === true) {
-                  return <div />
-                }
-                return (
-                    <Input placeholder={"ssl target host"} defaultValue={certificate.sslTargetHost} onChange={(e) => {
-                      const cert = setSslTargetHost(
-                          e.target.value,
-                          certificate,
-                          certs,
-                          setCerts
-                      );
-
-                      if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                        onSelected && onSelected(cert);
-                      }
-                    }}/>
-                )
-              }}
-            />
-            <Table.Column
-              key="delete"
-              render={(text, certificate: Certificate) => {
-                if(certificate.useServerCertificate === true) {
-                  return <div />
-                }
-                return (
-                    <Icon
-                        type="close"
-                        onClick={() => {
-                          if (selected && selected.rootCert.filePath === certificate.rootCert.filePath) {
-                            onSelected && onSelected();
+                        value={certificate.rootCert.filePath}
+                        checked={selected ? certificate.rootCert.filePath === selected.rootCert.filePath : false}
+                        onChange={() => onSelected && onSelected(certificate)}
+                      />
+                    </td>
+                    <td>
+                      <span title={certificate.rootCert.filePath}>{certificate.rootCert.fileName}</span>
+                    </td>
+                    {certificate.useServerCertificate ?
+                      <>
+                        <td><div>-</div></td>
+                        <td><div>-</div></td>
+                        <td></td>
+                        <td></td>
+                      </> :
+                      <>
+                        <td>
+                          {
+                            certificate.privateKey ?
+                              <span>{certificate.privateKey?.fileName||'-'}</span> :
+                              <a onClick={async (e) => {
+                                e.preventDefault();
+                                const cert = await handleImportPrivateKey(certificate, certs, setCerts);
+                                if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
+                                  onSelected && onSelected(cert);
+                                }
+                              }}>Import Key</a>
                           }
-                          deleteCertificateEntry(certificate, certs, setCerts);
-                        }}
-                        style={{
-                          cursor: "pointer",
-                        }}
-                    />
-                )
-              }}
-            />
-        </Table>
+                        </td>
+                        <td>
+                          {
+                            certificate.privateKey ?
+                              <span>{certificate.privateKey?.fileName||'-'}</span> :
+                              <a onClick={async (e) => {
+                                e.preventDefault();
+                                const cert = await handleImportCertChain(certificate, certs, setCerts);
+                                if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
+                                  onSelected && onSelected(cert);
+                                }
+                              }}>Import Cert Chain</a>
+                          }
+                        </td>
+                        <td>
+                          <InputGroup placeholder={"ssl target host"} defaultValue={certificate.sslTargetHost} onChange={(e) => {
+                              const cert = setSslTargetHost(
+                                  e.target.value,
+                                  certificate,
+                                  certs,
+                                  setCerts
+                              );
+
+                              if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
+                                onSelected && onSelected(cert);
+                              }
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <Button intent='danger' icon='delete' minimal onClick={() => {
+                              if (selected && selected.rootCert.filePath === certificate.rootCert.filePath) {
+                                onSelected && onSelected();
+                              }
+                              deleteCertificateEntry(certificate, certs, setCerts);
+                            }}
+                          />
+                        </td>
+                      </>
+                    }
+                  </tr>
+                })
+              }
+            </tbody>
+          </HTMLTable>
         </>
     );
 }
