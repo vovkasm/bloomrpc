@@ -23,7 +23,7 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-protobuf';
 
 import { exportResponseToJSONFile } from "../../behaviour/response";
-import Resizable from "re-resizable";
+import { Resizable } from "re-resizable";
 import { AddressBar } from "./AddressBar";
 import { deleteEnvironment, getEnvironments, saveEnvironment } from "../../storage/environments";
 
@@ -296,6 +296,7 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
             enable={{ right: true }}
             defaultSize={{
               width: "50%",
+              height: 'auto',
             }}
             maxWidth={"80%"}
             minWidth={"10%"}

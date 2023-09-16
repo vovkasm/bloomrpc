@@ -6,10 +6,6 @@ html, body {
   overflow-y: hidden;
 }
 
-.root {
-  background: #f0f2f5;
-}
-
 .ace-tm .ace_gutter {
   background: #fff !important;
 }
@@ -28,10 +24,6 @@ html, body {
   z-index: 30;
   width: 39%;
   right: 0px;
-}
-
-#metadata > .ace_gutter {
-  background: #f0f2f5 !important;
 }
 
 .inline-item {

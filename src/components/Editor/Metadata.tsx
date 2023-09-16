@@ -1,6 +1,6 @@
 import * as React from 'react';
 import AceEditor from 'react-ace';
-import Resizable from 're-resizable';
+import { Resizable } from 're-resizable';
 import { storeMetadata } from "../../storage";
 import { useState } from "react";
 import { Icon } from '@blueprintjs/core';
@@ -11,24 +11,23 @@ interface MetadataProps {
   value: string,
 }
 
+const minHeight = 32;
+
 export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataProps) {
-  const [height, setHeight] = useState(38);
-  const visibile = height > 38;
+  const [height, setHeight] = useState(minHeight);
+  const visibile = height > minHeight;
 
   return (
     <Resizable
         size={{width: "100%", height: height}}
         maxHeight={500}
-        minHeight={38}
+        minHeight={minHeight}
         enable={{top:true, right:false, bottom:true, left:false, topRight:false, bottomRight:false, bottomLeft:false, topLeft:false}}
         onResizeStop={(e, direction, ref, d) => {
           setHeight(height + d.height);
         }}
         className="meatada-panel"
-         style={{
-           ...styles.optionContainer,
-           ...{bottom: `-38px`, height: `${height}px`},
-         }}
+        style={{ ...styles.optionContainer, ...{bottom: `-${minHeight}px`, height: `${height}px`} }}
     >
       <div>
         <div style={styles.optionLabel}>
@@ -37,7 +36,7 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
             style={styles.optionLink}
             onClick={() => {
               if (visibile) {
-                setHeight(38)
+                setHeight(minHeight)
               } else {
                 setHeight(150);
               }
