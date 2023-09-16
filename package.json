@@ -47,7 +47,7 @@
     "@vitejs/plugin-react": "^4.0.4",
     "ace-builds": "^1.24.1",
     "cross-spawn": "^7.0.3",
-    "electron": "26.2.0",
+    "electron": "26.2.1",
     "electron-builder": "^24.6.4",
     "electron-store": "^8.1.0",
     "grpc-web": "^1.4.2",
