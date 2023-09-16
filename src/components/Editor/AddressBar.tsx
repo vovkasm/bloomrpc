@@ -129,7 +129,7 @@ export function AddressBar({loading, url, onChangeUrl, protoInfo, defaultEnviron
           className="server-url"
           rightElement={(
               <div style={{display: "flex", alignItems: "center", width: "125px"}}>
-                {loading ? <Spinner /> : <Icon icon="database"/>}
+                {loading ? <Spinner size={20} /> : <Icon icon="database"/>}
                 <RequestType protoInfo={protoInfo} />
               </div>
           )}

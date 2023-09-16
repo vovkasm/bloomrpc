@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Icon, notification } from 'antd';
-import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
+import { HotkeyConfig, Icon, useHotkeys } from '@blueprintjs/core';
 import {
   setCall,
   setIsLoading,
@@ -11,7 +10,8 @@ import {
 } from './actions';
 import { ControlsStateProps } from './Controls';
 import { GRPCEventType, GRPCRequest, ResponseMetaInformation, GRPCEventEmitter, GRPCWebRequest } from '../../behaviour';
-import { castToError } from '../..//utils';
+import { castToError } from '../../utils';
+import { toaster } from '../../toaster';
 
 export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
@@ -96,16 +96,10 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   } catch (mayBeError) {
     const e = castToError(mayBeError);
     console.error(e);
-    notification.error({
-      message: "Error constructing the request",
-      description: e.message,
-      duration: 5,
-      placement: "bottomRight",
-      style: {
-        width: "100%",
-        wordBreak: "break-all",
-      }
-    });
+    toaster.show({
+      message: `Error constructing the request: ${e.message}`,
+      intent: 'danger',
+    })
     grpcRequest.emit(GRPCEventType.END);
   }
 };
@@ -133,8 +127,9 @@ export function PlayButton({ dispatch, state, protoInfo, active }: ControlsState
 
   return (
     <Icon
-      type={state.loading ? "pause-circle" : "play-circle"}
-      theme="filled" style={{ ...styles.playIcon, ...(state.loading ? { color: "#ea5d5d" } : {}) }}
+      icon={state.loading ? "pause" : "play"}
+      size={48}
+      style={{ ...styles.playIcon, ...(state.loading ? { color: "#ea5d5d" } : {}) }}
       onClick={run}
     />
   )
@@ -144,9 +139,6 @@ const styles = {
   playIcon: {
     fontSize: 50,
     color: "#28d440",
-    border: "3px solid rgb(238, 238, 238)",
-    borderRadius: "50%",
     cursor: "pointer",
-    background: "#fff",
   },
 };
