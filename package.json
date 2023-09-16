@@ -71,10 +71,6 @@
     "vite-plugin-electron": "^0.14.0",
     "vite-plugin-electron-renderer": "^0.14.5"
   },
-  "overrides": {
-    "classnames": "2.3.2",
-    "rc-menu": "7.5.4"
-  },
   "devEngines": {
     "node": ">=8.12.x",
     "npm": ">=4.x",
