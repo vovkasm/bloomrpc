@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { EditorAction, EditorState } from './Editor';
 import { PlayButton } from './PlayButton';
-import { Icon, Tooltip } from 'antd';
 import { setRequestStreamData, setStreamCommitted } from './actions';
 import { ProtoInfo } from '../../behaviour';
+import { Icon, Tooltip } from '@blueprintjs/core';
 
 export interface ControlsStateProps {
   dispatch: React.Dispatch<EditorAction>
@@ -25,7 +25,7 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
       { isControlVisible(state) &&
         (
           <div style={styles.controlsContainer}>
-            <Tooltip placement="topLeft" title={"Push Data"}>
+            <Tooltip placement='top-start' content="Push Data">
               <div style={styles.pushData} onClick={() => {
                 if (state.call) {
                   dispatch(setRequestStreamData([
@@ -35,11 +35,11 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
                   state.call.write(state.data);
                 }
               }}>
-                <Icon type="double-right"/>
+                <Icon icon="double-chevron-right"/>
               </div>
             </Tooltip>
 
-            <Tooltip placement="topRight" title={"Commit Stream"}>
+            <Tooltip placement="top-end" content="Commit Stream">
               <div
                 style={styles.commit}
                 onClick={() => {
@@ -48,7 +48,7 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
                     dispatch(setStreamCommitted(true));
                   }
                 }}>
-                <Icon type="check"/>
+                <Icon icon="tick"/>
               </div>
             </Tooltip>
           </div>
