@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Icon } from 'antd';
 import AceEditor from 'react-ace';
 import Resizable from 're-resizable';
 import { storeMetadata } from "../../storage";
 import { useState } from "react";
+import { Icon } from '@blueprintjs/core';
 
 interface MetadataProps {
   onClickMetadata: () => void,
@@ -43,7 +43,7 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
               }
               onClickMetadata()
             }}
-          > {visibile ? <Icon type="down"/> : <Icon type="up"/>} METADATA </a>
+          > {visibile ? <Icon icon="chevron-down"/> : <Icon icon="chevron-up"/>} METADATA </a>
         </div>
 
         <div>
@@ -81,7 +81,7 @@ const styles = {
     marginBottom: "5px"
   },
   optionContainer: {
-    position: "absolute" as "absolute",
+    position: "absolute",
     fontWeight: 900,
     fontSize: "13px",
     borderLeft: "1px solid rgba(0, 21, 41, 0.18)",
@@ -92,4 +92,4 @@ const styles = {
     color: "#fff",
     textDecoration: "none",
   },
-};
+} as const;
