@@ -83,11 +83,7 @@ export default defineConfig(({ command }) => {
             },
           },
         },
-        renderer: {
-          resolve: {
-            ismobilejs: { type: 'cjs' },
-          }
-        }
+        renderer: {}
       }),
       react({
         jsxRuntime: 'classic',
