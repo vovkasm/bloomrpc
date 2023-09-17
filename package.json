@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder -c electron-builder.config.ts",
+    "format": "prettier . -w",
     "postinstall": "patch-package"
   },
   "debug": {
