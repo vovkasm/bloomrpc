@@ -1,6 +1,6 @@
+import { Tab, Tabs } from '@blueprintjs/core';
 import * as React from 'react';
 import AceEditor, { ICommand } from 'react-ace';
-import { Tab, Tabs } from '@blueprintjs/core';
 
 import { Viewer } from './Viewer';
 

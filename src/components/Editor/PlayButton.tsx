@@ -1,18 +1,19 @@
-import * as React from 'react';
 import { HotkeyConfig, Icon, useHotkeys } from '@blueprintjs/core';
+import * as React from 'react';
+
+import { GRPCEventEmitter, GRPCEventType, GRPCRequest, GRPCWebRequest, ResponseMetaInformation } from '../../behaviour';
+import { toaster } from '../../toaster';
+import { castToError } from '../../utils';
+import { ControlsStateProps } from './Controls';
 import {
+  addResponseStreamData,
   setCall,
   setIsLoading,
+  setRequestStreamData,
   setResponse,
   setResponseStreamData,
-  setRequestStreamData,
-  addResponseStreamData,
   setStreamCommitted,
 } from './actions';
-import { ControlsStateProps } from './Controls';
-import { GRPCEventType, GRPCRequest, ResponseMetaInformation, GRPCEventEmitter, GRPCWebRequest } from '../../behaviour';
-import { castToError } from '../../utils';
-import { toaster } from '../../toaster';
 
 export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set

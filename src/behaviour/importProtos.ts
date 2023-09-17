@@ -1,12 +1,13 @@
+import * as grpc from '@grpc/grpc-js';
+import * as loader from '@grpc/proto-loader';
 import { ipcRenderer } from 'electron';
 import * as path from 'path';
-import { Proto, ProtoFile, ProtoService, ServiceMethodsPayload, walkServices } from './protobuf';
-import isURL, { IsURLOptions } from 'validator/lib/isURL';
-import * as loader from '@grpc/proto-loader';
-import * as grpc from '@grpc/grpc-js';
 import * as protobuf from 'protobufjs';
 import { v4 as uuidv4 } from 'uuid';
+import isURL, { IsURLOptions } from 'validator/lib/isURL';
+
 import { castToError } from '../utils';
+import { Proto, ProtoFile, ProtoService, ServiceMethodsPayload, walkServices } from './protobuf';
 
 const commonProtosPath = [path.join(path.join(__dirname, '../..'))];
 

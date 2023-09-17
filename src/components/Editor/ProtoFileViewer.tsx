@@ -1,8 +1,8 @@
+import { Drawer } from '@blueprintjs/core';
 import React from 'react';
 import AceEditor from 'react-ace';
 
 import { ProtoInfo } from '../../behaviour';
-import { Drawer } from '@blueprintjs/core';
 
 interface ProtoFileViewerProps {
   protoInfo: ProtoInfo;

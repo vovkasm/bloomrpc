@@ -1,5 +1,6 @@
 // @ts-ignore
 import lodashGet from 'lodash.get';
+
 import { ProtoService } from './protobuf';
 
 export class ProtoInfo {

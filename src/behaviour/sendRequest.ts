@@ -1,9 +1,10 @@
+import { Client, Metadata, ServiceError, credentials } from '@grpc/grpc-js';
 import { EventEmitter } from 'events';
-import { credentials, Metadata, ServiceError, Client } from '@grpc/grpc-js';
-import { ProtoInfo } from './protoInfo';
 import * as fs from 'fs';
-import { Certificate } from './importCertificates';
 import * as grpcWeb from 'grpc-web';
+
+import { Certificate } from './importCertificates';
+import { ProtoInfo } from './protoInfo';
 
 export interface GRPCEventEmitter extends EventEmitter {
   protoInfo: ProtoInfo;

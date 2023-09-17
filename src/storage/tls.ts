@@ -1,5 +1,6 @@
 // @ts-ignore
 import Store from 'electron-store';
+
 import { Certificate } from '../behaviour';
 
 const TLSStore = new Store<{ certificates: Certificate[] }>({

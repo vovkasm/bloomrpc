@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { HotkeyConfig, Tab, Tabs, useHotkeys } from '@blueprintjs/core';
+import * as React from 'react';
 
-import { Editor, EditorEnvironment, EditorRequest } from '../Editor';
 import { ProtoInfo, ProtoService } from '../../behaviour';
+import { Editor, EditorEnvironment, EditorRequest } from '../Editor';
 import ss from './TabList.module.scss';
 
 interface TabListProps {

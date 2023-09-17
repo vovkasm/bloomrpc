@@ -1,6 +1,6 @@
+import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 import * as React from 'react';
 import AceEditor from 'react-ace';
-import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 
 interface ResponseProps {
   output: string;

@@ -1,8 +1,9 @@
 import { ipcRenderer } from 'electron';
-import * as path from 'path';
 import * as fs from 'fs';
-import { ProtoInfo } from './protoInfo';
+import * as path from 'path';
+
 import { EditorState } from '../components/Editor';
+import { ProtoInfo } from './protoInfo';
 
 export async function exportResponseToJSONFile(protoInfo: ProtoInfo, editorState: EditorState): Promise<void> {
   const filePaths = (await ipcRenderer.invoke('open-directory')) as string[];

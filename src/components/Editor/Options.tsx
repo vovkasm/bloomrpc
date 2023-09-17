@@ -1,10 +1,10 @@
-import React from 'react';
 import { Button, Dialog, DialogBody, Icon, Menu, MenuItem, Popover, Switch, Tooltip } from '@blueprintjs/core';
+import React from 'react';
 
-import { setInteractive, setProtoVisibility, setGrpcWeb } from './actions';
+import { Certificate, ProtoInfo } from '../../behaviour';
 import { EditorAction } from './Editor';
 import { TLSManager } from './TLSManager';
-import { ProtoInfo, Certificate } from '../../behaviour';
+import { setGrpcWeb, setInteractive, setProtoVisibility } from './actions';
 
 interface OptionsProps {
   protoInfo: ProtoInfo;

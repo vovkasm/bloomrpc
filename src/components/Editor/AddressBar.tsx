@@ -1,4 +1,3 @@
-import React, { ChangeEvent } from 'react';
 import {
   Alert,
   AnchorButton,
@@ -12,10 +11,11 @@ import {
   Popover,
   Spinner,
 } from '@blueprintjs/core';
+import React, { ChangeEvent } from 'react';
 
-import { RequestType } from './RequestType';
 import { ProtoInfo } from '../../behaviour';
 import { EditorEnvironment } from './Editor';
+import { RequestType } from './RequestType';
 
 export interface AddressBarProps {
   loading: boolean;

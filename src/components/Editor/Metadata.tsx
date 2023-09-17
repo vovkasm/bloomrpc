@@ -1,9 +1,10 @@
-import * as React from 'react';
-import AceEditor from 'react-ace';
-import { Resizable } from 're-resizable';
-import { storeMetadata } from '../../storage';
-import { useState } from 'react';
 import { Icon } from '@blueprintjs/core';
+import { Resizable } from 're-resizable';
+import * as React from 'react';
+import { useState } from 'react';
+import AceEditor from 'react-ace';
+
+import { storeMetadata } from '../../storage';
 
 interface MetadataProps {
   onClickMetadata: () => void;

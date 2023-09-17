@@ -1,9 +1,10 @@
+import { Icon, Tooltip } from '@blueprintjs/core';
 import * as React from 'react';
+
+import { ProtoInfo } from '../../behaviour';
 import { EditorAction, EditorState } from './Editor';
 import { PlayButton } from './PlayButton';
 import { setRequestStreamData, setStreamCommitted } from './actions';
-import { ProtoInfo } from '../../behaviour';
-import { Icon, Tooltip } from '@blueprintjs/core';
 
 export interface ControlsStateProps {
   dispatch: React.Dispatch<EditorAction>;

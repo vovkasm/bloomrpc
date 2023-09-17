@@ -1,8 +1,11 @@
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-protobuf';
+import 'ace-builds/src-noconflict/theme-textmate';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Sidebar } from './Sidebar';
-import { TabData, TabList } from './TabList';
-import { loadProtos, ProtoFile, ProtoService } from '../behaviour';
+import { v4 as uuidv4 } from 'uuid';
+
+import { ProtoFile, ProtoService, loadProtos } from '../behaviour';
 import {
   EditorTabsStorage,
   deleteRequestInfo,
@@ -14,10 +17,11 @@ import {
   storeRequestInfo,
   storeTabs,
 } from '../storage';
-import { EditorEnvironment } from './Editor';
 import { getEnvironments } from '../storage/environments';
-import { v4 as uuidv4 } from 'uuid';
 import { toaster } from '../toaster';
+import { EditorEnvironment } from './Editor';
+import { Sidebar } from './Sidebar';
+import { TabData, TabList } from './TabList';
 
 export interface EditorTabs {
   activeKey: string;

@@ -1,5 +1,18 @@
+import { Resizable } from 're-resizable';
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
+
+import { Certificate, GRPCEventEmitter, ProtoInfo } from '../../behaviour';
+import { exportResponseToJSONFile } from '../../behaviour/response';
+import { getMetadata, getUrl, storeUrl } from '../../storage';
+import { deleteEnvironment, getEnvironments, saveEnvironment } from '../../storage/environments';
+import { AddressBar } from './AddressBar';
+import { Controls, isControlVisible } from './Controls';
+import { Metadata } from './Metadata';
+import { Options } from './Options';
+import { ProtoFileViewer } from './ProtoFileViewer';
+import { Request } from './Request';
+import { Response } from './Response';
 import {
   actions,
   setData,
@@ -11,23 +24,6 @@ import {
   setTSLCertificate,
   setUrl,
 } from './actions';
-import { Response } from './Response';
-import { Metadata } from './Metadata';
-import { Controls, isControlVisible } from './Controls';
-import { Request } from './Request';
-import { Options } from './Options';
-import { ProtoFileViewer } from './ProtoFileViewer';
-import { Certificate, ProtoInfo, GRPCEventEmitter } from '../../behaviour';
-import { getMetadata, getUrl, storeUrl } from '../../storage';
-
-import 'ace-builds/src-noconflict/theme-textmate';
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/mode-protobuf';
-
-import { exportResponseToJSONFile } from '../../behaviour/response';
-import { Resizable } from 're-resizable';
-import { AddressBar } from './AddressBar';
-import { deleteEnvironment, getEnvironments, saveEnvironment } from '../../storage/environments';
 
 export interface EditorAction {
   [key: string]: any;

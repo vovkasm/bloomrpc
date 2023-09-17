@@ -1,7 +1,6 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import { join } from 'node:path';
-
+import { BrowserWindow, app, dialog, ipcMain } from 'electron';
 import store from 'electron-store';
+import { join } from 'node:path';
 
 // The built directory structure
 //

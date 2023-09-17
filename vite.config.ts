@@ -1,8 +1,9 @@
+import react from '@vitejs/plugin-react';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { defineConfig, Plugin, UserConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { Plugin, UserConfig, defineConfig } from 'vite';
 import electron from 'vite-plugin-electron/simple';
+
 import pkg from './package.json';
 
 const external = Object.keys('dependencies' in pkg ? pkg.dependencies : {});

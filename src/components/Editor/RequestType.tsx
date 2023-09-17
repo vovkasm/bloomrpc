@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { ProtoInfo } from '../../behaviour';
 
 interface RequestTypeProps {

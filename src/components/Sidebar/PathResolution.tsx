@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { storeImportPaths } from '../../storage';
 import { Button, Card, CardList, Text } from '@blueprintjs/core';
+import * as React from 'react';
+
+import { storeImportPaths } from '../../storage';
 
 interface PathResolutionProps {
   onImportsChange?: (paths: string[]) => void;

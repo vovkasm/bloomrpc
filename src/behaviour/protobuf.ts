@@ -1,5 +1,5 @@
-import { Message, Namespace, NamespaceBase, Root, Service } from 'protobufjs';
 import { GrpcObject } from '@grpc/grpc-js';
+import { Message, Namespace, NamespaceBase, Root, Service } from 'protobufjs';
 
 export type Proto = {
   fileName: string;

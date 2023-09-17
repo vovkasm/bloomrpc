@@ -1,6 +1,6 @@
-import * as path from 'path';
 import * as grpc from '@grpc/grpc-js';
 import * as loader from '@grpc/proto-loader';
+import * as path from 'path';
 
 const packageDef = loader.loadSync(path.resolve(__dirname, 'sample.proto'));
 const pkgDef = grpc.loadPackageDefinition(packageDef);

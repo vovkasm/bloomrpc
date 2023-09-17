@@ -1,10 +1,3 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { Badge } from '../Badge/Badge';
-import { OnProtoUpload, ProtoFile, ProtoService, importProtos, importResolvePath } from '../../behaviour';
-import { PathResolution, addImportPath } from './PathResolution';
-import { getImportPaths } from '../../storage';
-import { strcmp } from '../../utils';
 import {
   AnchorButton,
   Button,
@@ -20,6 +13,14 @@ import {
   Tree,
   TreeNodeInfo,
 } from '@blueprintjs/core';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+
+import { OnProtoUpload, ProtoFile, ProtoService, importProtos, importResolvePath } from '../../behaviour';
+import { getImportPaths } from '../../storage';
+import { strcmp } from '../../utils';
+import { Badge } from '../Badge/Badge';
+import { PathResolution, addImportPath } from './PathResolution';
 
 interface SidebarProps {
   protos: ProtoFile[];

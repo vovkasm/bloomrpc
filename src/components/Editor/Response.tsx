@@ -1,10 +1,9 @@
-import * as React from 'react';
 import { Tab, Tabs } from '@blueprintjs/core';
-
-import { Viewer } from './Viewer';
-import { EditorResponse } from './Editor';
+import * as React from 'react';
 
 import bluePng from '../../../resources/blue/128x128.png';
+import { EditorResponse } from './Editor';
+import { Viewer } from './Viewer';
 
 interface ResponseProps {
   streamResponse: EditorResponse[];

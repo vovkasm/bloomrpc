@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Button, HTMLTable, InputGroup, Radio } from '@blueprintjs/core';
+import * as React from 'react';
 
 import { Certificate, importCertChain, importPrivateKey, importRootCert } from '../../behaviour';
 import { getTLSList, storeTLSList } from '../../storage';
