@@ -7,36 +7,35 @@ export type Proto = {
   protoText: string;
   ast: GrpcObject;
   root: Root;
-}
+};
 
 export interface ProtoFile {
-  proto: Proto,
-  fileName: string
+  proto: Proto;
+  fileName: string;
   services: ProtoServiceList;
 }
 
 export interface ProtoServiceList {
-  [key: string]: ProtoService,
+  [key: string]: ProtoService;
 }
 
 export interface ProtoService {
-  proto: Proto,
-  serviceName: string,
-  methodsMocks: ServiceMethodsPayload,
-  methodsName: string[],
+  proto: Proto;
+  serviceName: string;
+  methodsMocks: ServiceMethodsPayload;
+  methodsName: string[];
 }
 
 export type ServiceMethodsPayload = {
   [name: string]: () => MethodPayload;
-}
+};
 
 export type MethodPayload = {
   plain: {
-      [key: string]: any;
+    [key: string]: any;
   };
   message: Message;
-}
-
+};
 
 export function walkServices(proto: Proto, onService: (service: Service, serviceName: string) => void): void {
   const walkNamespace = (ns: NamespaceBase) => {

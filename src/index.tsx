@@ -8,7 +8,6 @@ import './app.global.css';
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
-render(<App/>, document.getElementById('root'));
+render(<App />, document.getElementById('root'));
 
-postMessage({ payload: 'removeLoading' }, '*')
-
+postMessage({ payload: 'removeLoading' }, '*');

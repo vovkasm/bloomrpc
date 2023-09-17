@@ -1,14 +1,14 @@
 import * as React from 'react';
 import AceEditor from 'react-ace';
 import { Resizable } from 're-resizable';
-import { storeMetadata } from "../../storage";
-import { useState } from "react";
+import { storeMetadata } from '../../storage';
+import { useState } from 'react';
 import { Icon } from '@blueprintjs/core';
 
 interface MetadataProps {
-  onClickMetadata: () => void,
-  onMetadataChange: (value: string) => void,
-  value: string,
+  onClickMetadata: () => void;
+  onMetadataChange: (value: string) => void;
+  value: string;
 }
 
 const minHeight = 32;
@@ -19,36 +19,48 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
 
   return (
     <Resizable
-        size={{width: "100%", height: height}}
-        maxHeight={500}
-        minHeight={minHeight}
-        enable={{top:true, right:false, bottom:true, left:false, topRight:false, bottomRight:false, bottomLeft:false, topLeft:false}}
-        onResizeStop={(e, direction, ref, d) => {
-          setHeight(height + d.height);
-        }}
-        className="meatada-panel"
-        style={{ ...styles.optionContainer, ...{bottom: `-${minHeight}px`, height: `${height}px`} }}
+      size={{ width: '100%', height: height }}
+      maxHeight={500}
+      minHeight={minHeight}
+      enable={{
+        top: true,
+        right: false,
+        bottom: true,
+        left: false,
+        topRight: false,
+        bottomRight: false,
+        bottomLeft: false,
+        topLeft: false,
+      }}
+      onResizeStop={(e, direction, ref, d) => {
+        setHeight(height + d.height);
+      }}
+      className="meatada-panel"
+      style={{ ...styles.optionContainer, ...{ bottom: `-${minHeight}px`, height: `${height}px` } }}
     >
       <div>
         <div style={styles.optionLabel}>
           <a
-            href={"#"}
+            href={'#'}
             style={styles.optionLink}
             onClick={() => {
               if (visibile) {
-                setHeight(minHeight)
+                setHeight(minHeight);
               } else {
                 setHeight(150);
               }
-              onClickMetadata()
+              onClickMetadata();
             }}
-          > {visibile ? <Icon icon="chevron-down"/> : <Icon icon="chevron-up"/>} METADATA </a>
+          >
+            {' '}
+            {visibile ? <Icon icon="chevron-down" /> : <Icon icon="chevron-up" />} METADATA{' '}
+          </a>
         </div>
 
         <div>
           <AceEditor
-            width={"100%"}
-            style={{ background: "#f5f5f5" }}
+            width={'100%'}
+            style={{ background: '#f5f5f5' }}
             height={`${height + 20}px`}
             mode="json"
             focus={visibile}
@@ -64,31 +76,31 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
             highlightActiveLine={false}
             value={value}
             setOptions={{
-              useWorker: false
+              useWorker: false,
             }}
           />
         </div>
       </div>
     </Resizable>
-  )
+  );
 }
 
 const styles = {
   optionLabel: {
-    background: "#001529",
-    padding: "7px 10px",
-    marginBottom: "5px"
+    background: '#001529',
+    padding: '7px 10px',
+    marginBottom: '5px',
   },
   optionContainer: {
-    position: "absolute",
+    position: 'absolute',
     fontWeight: 900,
-    fontSize: "13px",
-    borderLeft: "1px solid rgba(0, 21, 41, 0.18)",
-    background: "#f5f5f5",
+    fontSize: '13px',
+    borderLeft: '1px solid rgba(0, 21, 41, 0.18)',
+    background: '#f5f5f5',
     zIndex: 10,
   },
   optionLink: {
-    color: "#fff",
-    textDecoration: "none",
+    color: '#fff',
+    textDecoration: 'none',
   },
 } as const;

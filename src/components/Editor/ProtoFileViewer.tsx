@@ -4,26 +4,24 @@ import AceEditor from 'react-ace';
 import { ProtoInfo } from '../../behaviour';
 import { Drawer } from '@blueprintjs/core';
 
-
 interface ProtoFileViewerProps {
-  protoInfo: ProtoInfo
-  visible: boolean
-  onClose: () => void
+  protoInfo: ProtoInfo;
+  visible: boolean;
+  onClose: () => void;
 }
 
 export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewerProps) {
-
   return (
     <Drawer
       title={protoInfo.service.proto.fileName.split('/').pop()}
-      position={"right"}
+      position={'right'}
       onClose={onClose}
       isOpen={visible}
     >
       <AceEditor
-        style={{ marginTop: "10px", background: "#fff" }}
-        width={"100%"}
-        height={"calc(100vh - 115px)"}
+        style={{ marginTop: '10px', background: '#fff' }}
+        width={'100%'}
+        height={'calc(100vh - 115px)'}
         mode="protobuf"
         theme="textmate"
         name="output"
@@ -35,7 +33,7 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
         highlightActiveLine={false}
         value={protoInfo.service.proto.protoText}
         onLoad={(editor: any) => {
-          editor.renderer.$cursorLayer.element.style.display = "none";
+          editor.renderer.$cursorLayer.element.style.display = 'none';
           editor.gotoLine(0, 0, true);
         }}
         setOptions={{

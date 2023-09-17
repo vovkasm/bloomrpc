@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
-import { join } from 'node:path'
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { join } from 'node:path';
 
 import store from 'electron-store';
 
@@ -15,7 +15,9 @@ import store from 'electron-store';
 //
 process.env.DIST_ELECTRON = join(__dirname, '../');
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist');
-process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? join(process.env.DIST_ELECTRON, '../public') : process.env.DIST;
+process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
+  ? join(process.env.DIST_ELECTRON, '../public')
+  : process.env.DIST;
 
 let mainWindow: BrowserWindow;
 
@@ -37,9 +39,9 @@ app.on('ready', async () => {
   ipcMain.handle('open-proto-files', async () => {
     const openDialogResult = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile', 'multiSelections'],
-      filters: [ { name: 'Protos', extensions: ['proto'] } ]
+      filters: [{ name: 'Protos', extensions: ['proto'] }],
     });
-  
+
     const filePaths = openDialogResult.filePaths;
     return filePaths || [];
   });
@@ -47,7 +49,7 @@ app.on('ready', async () => {
   ipcMain.handle('open-directory', async () => {
     const openDialogResult = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory'],
-      filters: []
+      filters: [],
     });
 
     const filePaths = openDialogResult.filePaths;
@@ -57,7 +59,7 @@ app.on('ready', async () => {
   ipcMain.handle('open-single-file', async () => {
     const openDialogResult = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
-      filters: [ { name: 'All', extensions: ['*'] } ]
+      filters: [{ name: 'All', extensions: ['*'] }],
     });
 
     const filePaths = openDialogResult.filePaths;
@@ -68,16 +70,16 @@ app.on('ready', async () => {
     show: false,
     width: 1324,
     height: 728,
-    backgroundColor: "#f0f2f5",
+    backgroundColor: '#f0f2f5',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-    }
+    },
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     const url = new URL('src/app.html', process.env.VITE_DEV_SERVER_URL);
-    mainWindow.loadURL(url.toString())
+    mainWindow.loadURL(url.toString());
   } else {
     mainWindow.loadFile(join(process.env.DIST, 'src/app.html'));
   }
@@ -88,7 +90,7 @@ app.on('ready', async () => {
       throw new Error('"mainWindow" is not defined');
     }
 
-    setTimeout(function() {
+    setTimeout(function () {
       mainWindow.show();
       mainWindow.focus();
     }, 150);

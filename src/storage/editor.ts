@@ -3,27 +3,27 @@ import Store from 'electron-store';
 import { ProtoFile } from '../behaviour';
 import { EditorTabs } from '../components/BloomRPC';
 import { EditorRequest } from '../components/Editor';
-import { EditorTabRequest } from "../components/TabList";
+import { EditorTabRequest } from '../components/TabList';
 
 type EditorStorage = {
-  url: string,
-  protos: string[],
-  tabs: EditorTabsStorage,
-  requests: TabRequestInfo[],
-  metadata: string,
+  url: string;
+  protos: string[];
+  tabs: EditorTabsStorage;
+  requests: TabRequestInfo[];
+  metadata: string;
 };
 
 const EditorStore = new Store<EditorStorage>({
-  name: "editor",
+  name: 'editor',
 });
 
 const KEYS = {
-  URL: "url",
-  PROTOS: "protos",
-  TABS: "tabs",
-  REQUESTS: "requests",
-  INTERACTIVE: "interactive",
-  METADATA: "metadata",
+  URL: 'url',
+  PROTOS: 'protos',
+  TABS: 'tabs',
+  REQUESTS: 'requests',
+  INTERACTIVE: 'interactive',
+  METADATA: 'metadata',
 } as const;
 
 /**
@@ -46,7 +46,10 @@ export function getUrl(): string | void {
  * @param protos
  */
 export function storeProtos(protos: ProtoFile[]) {
-  EditorStore.set(KEYS.PROTOS, protos.map(proto => proto.proto.filePath));
+  EditorStore.set(
+    KEYS.PROTOS,
+    protos.map((proto) => proto.proto.filePath),
+  );
 }
 
 /**
@@ -67,19 +70,19 @@ export function storeTabs(editorTabs: EditorTabs) {
       methodName: tab.methodName,
       serviceName: tab.service.serviceName,
       protoPath: tab.service.proto.filePath,
-      tabKey: tab.tabKey
+      tabKey: tab.tabKey,
     })),
-  })
+  });
 }
 
 export interface EditorTabsStorage {
-  activeKey: string,
+  activeKey: string;
   tabs: {
-    protoPath: string,
-    methodName: string,
-    serviceName: string,
-    tabKey: string
-  }[]
+    protoPath: string;
+    methodName: string;
+    serviceName: string;
+    tabKey: string;
+  }[];
 }
 
 /**
@@ -90,7 +93,7 @@ export function getTabs(): EditorTabsStorage | undefined {
 }
 
 interface TabRequestInfo extends EditorRequest {
-  id: string
+  id: string;
 }
 
 /**
@@ -103,7 +106,17 @@ interface TabRequestInfo extends EditorRequest {
  * @param interactive
  * @param tlsCertificate
  */
-export function storeRequestInfo({id, url, data, inputs, metadata, interactive, tlsCertificate, environment, grpcWeb}: EditorTabRequest) {
+export function storeRequestInfo({
+  id,
+  url,
+  data,
+  inputs,
+  metadata,
+  interactive,
+  tlsCertificate,
+  environment,
+  grpcWeb,
+}: EditorTabRequest) {
   const request = {
     id,
     url,
@@ -116,8 +129,7 @@ export function storeRequestInfo({id, url, data, inputs, metadata, interactive, 
     createdAt: new Date().toISOString(),
   };
 
-  const requestList = EditorStore.get('requests', [])
-    .filter((requestItem: TabRequestInfo) => requestItem.id !== id);
+  const requestList = EditorStore.get('requests', []).filter((requestItem: TabRequestInfo) => requestItem.id !== id);
 
   EditorStore.set(KEYS.REQUESTS, [...requestList, request]);
 }
@@ -144,8 +156,9 @@ export function getRequestInfo(tabKey: string): EditorRequest | undefined {
  * @param tabKey
  */
 export function deleteRequestInfo(tabKey: string) {
-  const requests = EditorStore.get(KEYS.REQUESTS, [])
-    .filter((requestItem: TabRequestInfo) => requestItem.id !== tabKey);
+  const requests = EditorStore.get(KEYS.REQUESTS, []).filter(
+    (requestItem: TabRequestInfo) => requestItem.id !== tabKey,
+  );
 
   EditorStore.set('requests', requests);
 }
@@ -155,5 +168,3 @@ export function clearEditor() {
 }
 
 export { EditorStore };
-
-

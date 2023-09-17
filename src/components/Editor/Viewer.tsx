@@ -3,13 +3,12 @@ import AceEditor from 'react-ace';
 import { HotkeyConfig, useHotkeys } from '@blueprintjs/core';
 
 interface ResponseProps {
-  output: string,
-  responseTime?: number
-  emptyContent?: Node | Element | JSX.Element
+  output: string;
+  responseTime?: number;
+  emptyContent?: Node | Element | JSX.Element;
 }
 
 export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
-
   const editorRef = React.useRef<AceEditor>(null);
   const inputSearch = React.useRef<HTMLInputElement>(null);
   const [showFind, setShowFind] = React.useState(false);
@@ -22,16 +21,21 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
     }
   }, [showFind, setShowFind, inputSearch]);
 
-  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
-    label: 'Toggle response search',
-    combo: 'mod+f',
-    allowInInput: true,
-    global: true,
-    onKeyDown: () => {
-      doShowFind();
-      return false;
-    }
-  }], [doShowFind]);
+  const hotkeys = React.useMemo<HotkeyConfig[]>(
+    () => [
+      {
+        label: 'Toggle response search',
+        combo: 'mod+f',
+        allowInInput: true,
+        global: true,
+        onKeyDown: () => {
+          doShowFind();
+          return false;
+        },
+      },
+    ],
+    [doShowFind],
+  );
 
   useHotkeys(hotkeys);
 
@@ -41,7 +45,7 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
         ref={inputSearch}
         name="search"
         className={`bp5-input find-match ${!showFind ? 'hide' : ''}`}
-        placeholder={"Search match"}
+        placeholder={'Search match'}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editorRef.current?.editor.findAll(e.target.value, {
             backwards: false,
@@ -50,23 +54,20 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
             wholeWord: false,
             regExp: true,
           });
-        }}/>
+        }}
+      />
 
       {!output && emptyContent}
 
-      { responseTime && (
-          <div style={styles.responseTime}>
-            {responseTime.toFixed(3)}s
-          </div>
-      )}
+      {responseTime && <div style={styles.responseTime}>{responseTime.toFixed(3)}s</div>}
 
       {output && (
         <AceEditor
           ref={editorRef}
-          className={"response-edit"}
-          style={{ background: "#fff" }}
-          width={"100%"}
-          height={"calc(100vh - 188px)"}
+          className={'response-edit'}
+          style={{ background: '#fff' }}
+          width={'100%'}
+          height={'calc(100vh - 188px)'}
           mode="json"
           theme="textmate"
           name="output"
@@ -78,41 +79,43 @@ export function Viewer({ output, responseTime, emptyContent }: ResponseProps) {
           highlightActiveLine={false}
           value={output}
           onLoad={(editor: any) => {
-            editor.renderer.$cursorLayer.element.style.display = "none";
+            editor.renderer.$cursorLayer.element.style.display = 'none';
             editor.$blockScrolling = Infinity;
           }}
-          commands={[{
-            name: 'find',
-            bindKey: { win: 'Ctrl-f', mac: 'Command-f' }, //key combination used for the command.
-            exec: () => doShowFind()
-          }]}
+          commands={[
+            {
+              name: 'find',
+              bindKey: { win: 'Ctrl-f', mac: 'Command-f' }, //key combination used for the command.
+              exec: () => doShowFind(),
+            },
+          ]}
           setOptions={{
             useWorker: false,
             showLineNumbers: false,
             highlightGutterLine: false,
             fixedWidthGutter: true,
             tabSize: 1,
-            displayIndentGuides: false
+            displayIndentGuides: false,
           }}
         />
       )}
     </div>
-  )
+  );
 }
 
 const styles = {
   responseContainer: {
-    background: "white",
-    position: "relative" as "relative",
+    background: 'white',
+    position: 'relative' as 'relative',
   },
   responseTime: {
-    userSelect: "none" as "none",
+    userSelect: 'none' as 'none',
     fontSize: 11,
-    padding: "3px 7px",
+    padding: '3px 7px',
     background: '#f3f6f7',
-    position: "absolute" as "absolute",
-    top: "5px",
-    right: "0px",
+    position: 'absolute' as 'absolute',
+    top: '5px',
+    right: '0px',
     zIndex: 30,
-  }
+  },
 };

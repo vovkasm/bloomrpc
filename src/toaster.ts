@@ -1,4 +1,4 @@
-import {OverlayToaster} from '@blueprintjs/core';
+import { OverlayToaster } from '@blueprintjs/core';
 
 export const toaster = OverlayToaster.create({
   canEscapeKeyClear: true,

@@ -1,21 +1,21 @@
-import { Configuration } from "electron-builder";
+import { Configuration } from 'electron-builder';
 
 const config: Configuration = {
-  appId: "org.vovkasm.desktop.BloomRPC",
+  appId: 'org.vovkasm.desktop.BloomRPC',
   asar: true,
 
   directories: {
-    output: "release/${version}",
+    output: 'release/${version}',
     buildResources: 'resources',
   },
-  files: ["dist-electron", "dist"],
+  files: ['dist-electron', 'dist'],
   mac: {
-    artifactName: "${productName}_${version}.${ext}",
-    target: ["dmg", "zip"],
+    artifactName: '${productName}_${version}.${ext}',
+    target: ['dmg', 'zip'],
   },
   win: {
-    artifactName: "${productName}_${version}.${ext}",
-    target: [{ target: "nsis", arch: ["x64"] }],
+    artifactName: '${productName}_${version}.${ext}',
+    target: [{ target: 'nsis', arch: ['x64'] }],
   },
   nsis: {
     oneClick: false,

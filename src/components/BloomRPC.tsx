@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { TabData, TabList } from './TabList';
-import {loadProtos, ProtoFile, ProtoService} from '../behaviour';
+import { loadProtos, ProtoFile, ProtoService } from '../behaviour';
 import {
   EditorTabsStorage,
   deleteRequestInfo,
@@ -14,27 +14,27 @@ import {
   storeRequestInfo,
   storeTabs,
 } from '../storage';
-import { EditorEnvironment } from "./Editor";
-import { getEnvironments } from "../storage/environments";
+import { EditorEnvironment } from './Editor';
+import { getEnvironments } from '../storage/environments';
 import { v4 as uuidv4 } from 'uuid';
 import { toaster } from '../toaster';
 
 export interface EditorTabs {
-  activeKey: string
-  tabs: TabData[]
+  activeKey: string;
+  tabs: TabData[];
 }
 
 export function BloomRPC() {
   const [protos, setProtosState] = useState<ProtoFile[]>([]);
   const [editorTabs, setEditorTabs] = useState<EditorTabs>({
-    activeKey: "0",
+    activeKey: '0',
     tabs: [],
   });
 
   const [environments, setEnvironments] = useState<EditorEnvironment[]>(getEnvironments());
 
-  function setTabs(props: EditorTabs|undefined) {
-    const localProps = props || {activeKey: "0", tabs: []};
+  function setTabs(props: EditorTabs | undefined) {
+    const localProps = props || { activeKey: '0', tabs: [] };
     setEditorTabs(localProps);
     storeTabs(localProps);
   }
@@ -51,67 +51,65 @@ export function BloomRPC() {
 
   return (
     <div style={styles.layout}>
-        <aside style={styles.sider}>
-          <Sidebar
-            protos={protos}
-            onProtoUpload={handleProtoUpload(setProtos, protos)}
-            onReload={() => {
-              hydrateEditor(setProtos, setTabs);
-            }}
-            onMethodSelected={handleMethodSelected(editorTabs, setTabs)}
-            onDeleteAll={() => {
-              setProtos([]);
-            }}
-            onMethodDoubleClick={handleMethodDoubleClick(editorTabs, setTabs)}
-          />
-        </aside>
+      <aside style={styles.sider}>
+        <Sidebar
+          protos={protos}
+          onProtoUpload={handleProtoUpload(setProtos, protos)}
+          onReload={() => {
+            hydrateEditor(setProtos, setTabs);
+          }}
+          onMethodSelected={handleMethodSelected(editorTabs, setTabs)}
+          onDeleteAll={() => {
+            setProtos([]);
+          }}
+          onMethodDoubleClick={handleMethodDoubleClick(editorTabs, setTabs)}
+        />
+      </aside>
 
-        <main style={styles.content}>
-          <TabList
-            tabs={editorTabs.tabs || []}
-            activeKey={editorTabs.activeKey}
-            environmentList={environments}
-            onEnvironmentChange={() => {
-              setEnvironments(getEnvironments());
-            }}
-            onEditorRequestChange={(editorRequestInfo) => {
-              storeRequestInfo(editorRequestInfo);
-            }}
-            onDelete={(activeKey: string) => {
-              let newActiveKey = "0";
+      <main style={styles.content}>
+        <TabList
+          tabs={editorTabs.tabs || []}
+          activeKey={editorTabs.activeKey}
+          environmentList={environments}
+          onEnvironmentChange={() => {
+            setEnvironments(getEnvironments());
+          }}
+          onEditorRequestChange={(editorRequestInfo) => {
+            storeRequestInfo(editorRequestInfo);
+          }}
+          onDelete={(activeKey: string) => {
+            let newActiveKey = '0';
 
-              const index = editorTabs.tabs
-                .findIndex(tab => tab.tabKey === activeKey);
+            const index = editorTabs.tabs.findIndex((tab) => tab.tabKey === activeKey);
 
-              if (index === -1) {
-                return;
+            if (index === -1) {
+              return;
+            }
+
+            if (editorTabs.tabs.length > 1) {
+              if (activeKey === editorTabs.activeKey) {
+                const newTab = editorTabs.tabs[index - 1] || editorTabs.tabs[index + 1];
+                newActiveKey = newTab.tabKey;
+              } else {
+                newActiveKey = editorTabs.activeKey;
               }
+            }
 
-              if (editorTabs.tabs.length > 1) {
-                if (activeKey === editorTabs.activeKey) {
-                  const newTab = editorTabs.tabs[index - 1] || editorTabs.tabs[index + 1];
-                  newActiveKey = newTab.tabKey;
-                } else {
-                  newActiveKey = editorTabs.activeKey;
-                }
-              }
+            deleteRequestInfo(activeKey);
 
-              deleteRequestInfo(activeKey);
-
-              setTabs({
-                activeKey: newActiveKey,
-                tabs: editorTabs.tabs.filter(tab => tab.tabKey !== activeKey),
-              });
-
-            }}
-            onChange={(activeKey: string) => {
-              setTabs({
-                activeKey,
-                tabs: editorTabs.tabs || [],
-              })
-            }}
-          />
-        </main>
+            setTabs({
+              activeKey: newActiveKey,
+              tabs: editorTabs.tabs.filter((tab) => tab.tabKey !== activeKey),
+            });
+          }}
+          onChange={(activeKey: string) => {
+            setTabs({
+              activeKey,
+              tabs: editorTabs.tabs || [],
+            });
+          }}
+        />
+      </main>
     </div>
   );
 }
@@ -121,16 +119,16 @@ export function BloomRPC() {
  * @param setProtos
  * @param setEditorTabs
  */
-async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTabs: React.Dispatch<EditorTabs>): Promise<void> {
+async function hydrateEditor(
+  setProtos: React.Dispatch<ProtoFile[]>,
+  setEditorTabs: React.Dispatch<EditorTabs>,
+): Promise<void> {
   const tasks: Array<Promise<boolean>> = [];
   const savedProtos = getProtos();
   const importPaths = getImportPaths();
 
   if (savedProtos) {
-    tasks.push(
-      loadProtos(savedProtos, importPaths, handleProtoUpload(setProtos, []))
-        .then(() => true)
-    );
+    tasks.push(loadProtos(savedProtos, importPaths, handleProtoUpload(setProtos, [])).then(() => true));
 
     const savedEditorTabs = getTabs();
     if (savedEditorTabs) {
@@ -139,7 +137,7 @@ async function hydrateEditor(setProtos: React.Dispatch<ProtoFile[]>, setEditorTa
           const tabs = await loadTabs(savedEditorTabs);
           setEditorTabs(tabs);
         } catch (_) {
-          setEditorTabs({activeKey: "0", tabs: []});
+          setEditorTabs({ activeKey: '0', tabs: [] });
         }
         return true;
       };
@@ -162,9 +160,12 @@ async function loadTabs(editorTabs: EditorTabsStorage): Promise<EditorTabs> {
 
   const importPaths = getImportPaths();
 
-  const protos = await loadProtos(editorTabs.tabs.map((tab) => {
-    return tab.protoPath;
-  }), importPaths);
+  const protos = await loadProtos(
+    editorTabs.tabs.map((tab) => {
+      return tab.protoPath;
+    }),
+    importPaths,
+  );
 
   const previousTabs = editorTabs.tabs.map((tab) => {
     const def = protos.find((protoFile) => {
@@ -182,7 +183,7 @@ async function loadTabs(editorTabs: EditorTabsStorage): Promise<EditorTabs> {
       methodName: tab.methodName,
       service: def.services[tab.serviceName],
       initialRequest: getRequestInfo(tab.tabKey),
-    }
+    };
   });
 
   storedEditTabs.tabs = previousTabs.filter((tab) => tab) as TabData[];
@@ -202,20 +203,20 @@ function handleProtoUpload(setProtos: React.Dispatch<ProtoFile[]>, protos: Proto
         intent: 'danger',
         message: `Error while importing protos: ${err.message}`,
         icon: 'cross-circle',
-      })
+      });
       setProtos([]);
       return;
     }
 
     const protoMinusExisting = protos.filter((proto) => {
-      return !newProtos.find((p) => p.fileName === proto.fileName)
+      return !newProtos.find((p) => p.fileName === proto.fileName);
     });
 
     const appProtos = [...protoMinusExisting, ...newProtos];
     setProtos(appProtos);
 
     return appProtos;
-  }
+  };
 }
 
 /**
@@ -228,11 +229,10 @@ function handleMethodSelected(editorTabs: EditorTabs, setTabs: React.Dispatch<Ed
     const tab = {
       tabKey: `${protoService.serviceName}${methodName}`,
       methodName,
-      service: protoService
+      service: protoService,
     };
 
-    const tabExists = editorTabs.tabs
-      .find(exisingTab => exisingTab.tabKey === tab.tabKey);
+    const tabExists = editorTabs.tabs.find((exisingTab) => exisingTab.tabKey === tab.tabKey);
 
     if (tabExists) {
       setTabs({
@@ -248,15 +248,15 @@ function handleMethodSelected(editorTabs: EditorTabs, setTabs: React.Dispatch<Ed
       activeKey: tab.tabKey,
       tabs: newTabs,
     });
-  }
+  };
 }
 
-function handleMethodDoubleClick(editorTabs: EditorTabs, setTabs: React.Dispatch<EditorTabs>){
+function handleMethodDoubleClick(editorTabs: EditorTabs, setTabs: React.Dispatch<EditorTabs>) {
   return (methodName: string, protoService: ProtoService) => {
     const tab = {
       tabKey: `${protoService.serviceName}${methodName}-${uuidv4()}`,
       methodName,
-      service: protoService
+      service: protoService,
     };
 
     const newTabs = [...editorTabs.tabs, tab];
@@ -265,22 +265,21 @@ function handleMethodDoubleClick(editorTabs: EditorTabs, setTabs: React.Dispatch
       activeKey: tab.tabKey,
       tabs: newTabs,
     });
-  }
-
+  };
 }
 
 const styles = {
   layout: {
     display: 'flex',
-    height: "100vh",
+    height: '100vh',
     flexDirection: 'row',
   },
   sider: {
     width: '300px',
     zIndex: 20,
-    borderRight: "1px solid rgba(0, 21, 41, 0.18)",
-    backgroundColor: "white",
-    boxShadow: "3px 0px 4px 0px rgba(0,0,0,0.10)",
+    borderRight: '1px solid rgba(0, 21, 41, 0.18)',
+    backgroundColor: 'white',
+    boxShadow: '3px 0px 4px 0px rgba(0,0,0,0.10)',
     display: 'flex',
     flexDirection: 'column',
   },
@@ -288,5 +287,5 @@ const styles = {
     flex: 1,
     position: 'relative',
     minWidth: 0,
-  }
+  },
 } as const;

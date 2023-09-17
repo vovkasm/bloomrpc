@@ -4,5 +4,5 @@ export function castToError(e: unknown): Error {
 }
 
 export function strcmp(a: string, b: string): -1 | 0 | 1 {
-  return a < b ? -1 : (a > b ? 1 : 0);
+  return a < b ? -1 : a > b ? 1 : 0;
 }

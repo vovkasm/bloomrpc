@@ -1,16 +1,14 @@
 // @ts-ignore
-import Store from "electron-store";
-import { Certificate } from "../behaviour";
+import Store from 'electron-store';
+import { Certificate } from '../behaviour';
 
-const TLSStore = new Store<{certificates: Certificate[]}>({
-  name: "tls",
+const TLSStore = new Store<{ certificates: Certificate[] }>({
+  name: 'tls',
 });
 
-
 const TLS_KEYS = {
-  CERTIFICATES: 'certificates'
+  CERTIFICATES: 'certificates',
 } as const;
-
 
 export function storeTLSList(certs: Certificate[]) {
   TLSStore.set(TLS_KEYS.CERTIFICATES, certs);
@@ -19,7 +17,7 @@ export function storeTLSList(certs: Certificate[]) {
 export function getTLSList() {
   const serverCertificate = {
     useServerCertificate: true,
-    rootCert: { fileName: "Server Certificate", filePath: "" },
+    rootCert: { fileName: 'Server Certificate', filePath: '' },
   };
   return TLSStore.get(TLS_KEYS.CERTIFICATES, [serverCertificate]);
 }

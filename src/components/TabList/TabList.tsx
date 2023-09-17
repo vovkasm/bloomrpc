@@ -6,85 +6,89 @@ import { ProtoInfo, ProtoService } from '../../behaviour';
 import ss from './TabList.module.scss';
 
 interface TabListProps {
-  tabs: TabData[]
-  activeKey?: string
-  onChange?: (activeKey: string) => void
-  onDelete?: (activeKey: string) => void
-  onEditorRequestChange?: (requestInfo: EditorTabRequest) => void
-  environmentList?: EditorEnvironment[],
-  onEnvironmentChange?: () => void
+  tabs: TabData[];
+  activeKey?: string;
+  onChange?: (activeKey: string) => void;
+  onDelete?: (activeKey: string) => void;
+  onEditorRequestChange?: (requestInfo: EditorTabRequest) => void;
+  environmentList?: EditorEnvironment[];
+  onEnvironmentChange?: () => void;
 }
 
 export interface TabData {
-  tabKey: string
-  methodName: string
-  service: ProtoService
-  initialRequest?: EditorRequest,
+  tabKey: string;
+  methodName: string;
+  service: ProtoService;
+  initialRequest?: EditorRequest;
 }
 
 export interface EditorTabRequest extends EditorRequest {
-  id: string
+  id: string;
 }
 
-export function TabList({ tabs, activeKey, onChange, onDelete, onEditorRequestChange, environmentList, onEnvironmentChange }: TabListProps) {
-  const tabsWithMatchingKey =
-    tabs.filter(tab => tab.tabKey === activeKey);
+export function TabList({
+  tabs,
+  activeKey,
+  onChange,
+  onDelete,
+  onEditorRequestChange,
+  environmentList,
+  onEnvironmentChange,
+}: TabListProps) {
+  const tabsWithMatchingKey = tabs.filter((tab) => tab.tabKey === activeKey);
 
-  const tabActiveKey = tabsWithMatchingKey.length === 0
-    ? [...tabs.map(tab => tab.tabKey)].pop()
-    : [...tabsWithMatchingKey.map(tab => tab.tabKey)].pop();
+  const tabActiveKey =
+    tabsWithMatchingKey.length === 0
+      ? [...tabs.map((tab) => tab.tabKey)].pop()
+      : [...tabsWithMatchingKey.map((tab) => tab.tabKey)].pop();
 
-  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
-    label: 'Close current tab',
-    combo: 'mod+w',
-    global: true,
-    preventDefault: true,
-    onKeyDown: () => {
-      if (tabActiveKey) {
-        onDelete && onDelete(tabActiveKey);
-      }
-      return false;
-    },
-  }], [tabActiveKey, onDelete]);
+  const hotkeys = React.useMemo<HotkeyConfig[]>(
+    () => [
+      {
+        label: 'Close current tab',
+        combo: 'mod+w',
+        global: true,
+        preventDefault: true,
+        onKeyDown: () => {
+          if (tabActiveKey) {
+            onDelete && onDelete(tabActiveKey);
+          }
+          return false;
+        },
+      },
+    ],
+    [tabActiveKey, onDelete],
+  );
 
   useHotkeys(hotkeys);
 
   return (
     <>
-      <Tabs
-        className={ss.mainTabs}
-        selectedTabId={tabActiveKey}
-        onChange={onChange}
-        animate={false}
-      >
-        {
-          tabs.map((tab, index) => {
-            return (
-              <Tab
-                id={tab.tabKey}
-                key={tab.tabKey}
-                title={
-                  `${tab.service.serviceName}.${tab.methodName}`
-                }
-                panel={
-                  <Editor
-                    key={tab.tabKey}
-                    active={tab.tabKey === activeKey}
-                    environmentList={environmentList}
-                    protoInfo={new ProtoInfo(tab.service, tab.methodName)}
-                    initialRequest={tab.initialRequest}
-                    onEnvironmentListChange={onEnvironmentChange}
-                    onRequestChange={(editorRequest) => {
-                      onEditorRequestChange && onEditorRequestChange({ id: tab.tabKey, ...editorRequest });
-                    }}
-                  />
-                }
-              />
-            )
-          })
-        }
+      <Tabs className={ss.mainTabs} selectedTabId={tabActiveKey} onChange={onChange} animate={false}>
+        {tabs.map((tab, index) => {
+          return (
+            <Tab
+              id={tab.tabKey}
+              key={tab.tabKey}
+              title={`${tab.service.serviceName}.${tab.methodName}`}
+              panel={
+                <Editor
+                  key={tab.tabKey}
+                  active={tab.tabKey === activeKey}
+                  environmentList={environmentList}
+                  protoInfo={new ProtoInfo(tab.service, tab.methodName)}
+                  initialRequest={tab.initialRequest}
+                  onEnvironmentListChange={onEnvironmentChange}
+                  onRequestChange={(editorRequest) => {
+                    onEditorRequestChange && onEditorRequestChange({ id: tab.tabKey, ...editorRequest });
+                  }}
+                />
+              }
+            />
+          );
+        })}
       </Tabs>
-    {/* <AntTabs
+      {/* <AntTabs
       className={"draggable-tabs"}
       onEdit={(targetKey, action) => {
         if (action === "remove" && typeof targetKey === 'string') {

@@ -1,9 +1,9 @@
-import { EventEmitter } from "events";
-import { credentials, Metadata, ServiceError, Client } from "@grpc/grpc-js";
+import { EventEmitter } from 'events';
+import { credentials, Metadata, ServiceError, Client } from '@grpc/grpc-js';
 import { ProtoInfo } from './protoInfo';
-import * as fs from "fs";
-import { Certificate } from "./importCertificates";
-import * as grpcWeb from 'grpc-web'
+import * as fs from 'fs';
+import { Certificate } from './importCertificates';
+import * as grpcWeb from 'grpc-web';
 
 export interface GRPCEventEmitter extends EventEmitter {
   protoInfo: ProtoInfo;
@@ -28,9 +28,9 @@ export interface ResponseMetaInformation {
 }
 
 export const GRPCEventType = {
-  DATA: "DATA",
-  ERROR: "ERROR",
-  END: "END",
+  DATA: 'DATA',
+  ERROR: 'ERROR',
+  END: 'END',
 };
 
 export class GRPCRequest extends EventEmitter {
@@ -57,21 +57,21 @@ export class GRPCRequest extends EventEmitter {
     const serviceClient: any = this.protoInfo.client();
     const client: Client = this.getClient(serviceClient);
     let inputs = {};
-    let metadata: {[key: string]: any} = {};
+    let metadata: { [key: string]: any } = {};
 
     try {
       const reqInfo = this.parseRequestInfo(this.inputs, this.metadata);
       inputs = reqInfo.inputs;
       metadata = reqInfo.metadata;
-    } catch(e) {
+    } catch (e) {
       return this;
     }
 
     // Add metadata
     const md = new Metadata();
-    Object.keys(metadata).forEach(key => {
-      if (key.endsWith("-bin")) {
-        let encoding = "utf8";
+    Object.keys(metadata).forEach((key) => {
+      if (key.endsWith('-bin')) {
+        let encoding = 'utf8';
         let value = metadata[key];
 
         // can prefix the value with any encoding that the buffer supports
@@ -136,7 +136,7 @@ export class GRPCRequest extends EventEmitter {
       try {
         const reqInfo = this.parseRequestInfo(data);
         inputs = reqInfo.inputs;
-      } catch(e) {
+      } catch (e) {
         return this;
       }
       this._call.write(inputs);
@@ -175,17 +175,17 @@ export class GRPCRequest extends EventEmitter {
       if (this.tlsCertificate.sslTargetHost) {
         options = {
           ...options,
-          'grpc.ssl_target_name_override' : this.tlsCertificate.sslTargetHost,
+          'grpc.ssl_target_name_override': this.tlsCertificate.sslTargetHost,
           'grpc.default_authority': this.tlsCertificate.sslTargetHost,
-        }
+        };
       }
-      if(this.tlsCertificate.useServerCertificate === true) {
+      if (this.tlsCertificate.useServerCertificate === true) {
         creds = credentials.createSsl();
       } else {
         creds = credentials.createSsl(
-            fs.readFileSync(this.tlsCertificate.rootCert.filePath),
-            this.tlsCertificate.privateKey && fs.readFileSync(this.tlsCertificate.privateKey.filePath),
-            this.tlsCertificate.certChain && fs.readFileSync(this.tlsCertificate.certChain.filePath),
+          fs.readFileSync(this.tlsCertificate.rootCert.filePath),
+          this.tlsCertificate.privateKey && fs.readFileSync(this.tlsCertificate.privateKey.filePath),
+          this.tlsCertificate.certChain && fs.readFileSync(this.tlsCertificate.certChain.filePath),
         );
       }
     }
@@ -226,7 +226,6 @@ export class GRPCRequest extends EventEmitter {
    * @param streamStartTime
    */
   private handleServerStreaming(call: any, streamStartTime?: Date) {
-
     call.on('data', (data: object) => {
       const responseMetaInformation = this.responseMetaInformation(streamStartTime, true);
       this.emit(GRPCEventType.DATA, data, responseMetaInformation);
@@ -238,7 +237,8 @@ export class GRPCRequest extends EventEmitter {
       if (err && err.code !== 1) {
         this.emit(GRPCEventType.ERROR, err, responseMetaInformation);
 
-        if (err.code === 2 || err.code === 14) { // Stream Removed.
+        if (err.code === 2 || err.code === 14) {
+          // Stream Removed.
           this.emit(GRPCEventType.END, call);
         }
       }
@@ -305,14 +305,14 @@ export class GRPCRequest extends EventEmitter {
    * @param data
    * @param userMetadata
    */
-  private parseRequestInfo(data: string, userMetadata?: string): { inputs: object, metadata: object } {
+  private parseRequestInfo(data: string, userMetadata?: string): { inputs: object; metadata: object } {
     let inputs = {};
-    let metadata: {[key: string]: any} = {};
+    let metadata: { [key: string]: any } = {};
 
     try {
-      inputs = JSON.parse(data || "{}")
+      inputs = JSON.parse(data || '{}');
     } catch (mayBeError) {
-      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError })
+      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError });
       this.emit(GRPCEventType.ERROR, e, {});
       this.emit(GRPCEventType.END);
       throw e;
@@ -320,9 +320,9 @@ export class GRPCRequest extends EventEmitter {
 
     if (userMetadata) {
       try {
-        metadata = JSON.parse(userMetadata || "{}")
+        metadata = JSON.parse(userMetadata || '{}');
       } catch (mayBeError) {
-        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError })
+        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError });
         this.emit(GRPCEventType.ERROR, e, {});
         this.emit(GRPCEventType.END);
         throw e;
@@ -344,7 +344,7 @@ export class GRPCWebRequest extends EventEmitter {
   _fullUrl?: string;
 
   constructor({ url, protoInfo, metadata, inputs, interactive, tlsCertificate }: GRPCRequestInfo) {
-    super()
+    super();
     this.url = url;
     this.protoInfo = protoInfo;
     this.metadata = metadata;
@@ -357,15 +357,15 @@ export class GRPCWebRequest extends EventEmitter {
 
   send(): GRPCWebRequest {
     const serviceClient: any = this.protoInfo.client();
-    const client = new grpcWeb.GrpcWebClientBase({format: 'text'})
+    const client = new grpcWeb.GrpcWebClientBase({ format: 'text' });
     let inputs = {};
-    let metadata: {[key: string]: any} = {};
+    let metadata: { [key: string]: any } = {};
 
     try {
       const reqInfo = this.parseRequestInfo(this.inputs, this.metadata);
       inputs = reqInfo.inputs;
       metadata = reqInfo.metadata;
-    } catch(e) {
+    } catch (e) {
       return this;
     }
 
@@ -373,34 +373,34 @@ export class GRPCWebRequest extends EventEmitter {
     let call: grpcWeb.ClientReadableStream<any>;
     const requestStartTime = new Date();
 
-    const web = grpcWeb as any
-    const rpc = serviceClient.service[this.protoInfo.methodName]
+    const web = grpcWeb as any;
+    const rpc = serviceClient.service[this.protoInfo.methodName];
 
-    let scheme = 'http://'
-    if (this.url.startsWith("http://") || this.url.startsWith("https://")) {
-      scheme = ''
+    let scheme = 'http://';
+    if (this.url.startsWith('http://') || this.url.startsWith('https://')) {
+      scheme = '';
     } else if (this.tlsCertificate) {
       if (this.tlsCertificate.useServerCertificate) {
-        scheme = 'https://'
+        scheme = 'https://';
       } else {
         // TODO: can we do anything about self-signed CA?
       }
     }
 
-    const fullUrl : string = scheme+this.url+rpc.path
-    this._fullUrl = fullUrl
+    const fullUrl: string = scheme + this.url + rpc.path;
+    this._fullUrl = fullUrl;
 
     const methodDescriptor = new web.MethodDescriptor(
       rpc.path, // name
       this.protoInfo.isServerStreaming() ? web.MethodType.SERVER_STREAMING : web.MethodType.UNARY, //method type
-      function(){}, // request type
-      function(){}, // response type
+      function () {}, // request type
+      function () {}, // response type
       rpc.requestSerialize, // request serialisation fn
-      rpc.responseDeserialize // response serialisation fn
+      rpc.responseDeserialize, // response serialisation fn
     );
 
     if (this.protoInfo.isClientStreaming()) {
-      const err = new Error('client streaming is not supported in GRPC-Web at the moment')
+      const err = new Error('client streaming is not supported in GRPC-Web at the moment');
       this.emit(GRPCEventType.ERROR, err, {});
       this.emit(GRPCEventType.END);
       throw err;
@@ -412,26 +412,20 @@ export class GRPCWebRequest extends EventEmitter {
         inputs,
         metadata, //metadata
         methodDescriptor, // MethodDescriptor
-      )
+      );
     } else {
-      call = client.rpcCall(
-        fullUrl,
-        inputs,
-        metadata,
-        methodDescriptor,
-        (err: grpcWeb.RpcError, response: any) =>
-          this.handleUnaryResponse(err, response, requestStartTime)
-      )
+      call = client.rpcCall(fullUrl, inputs, metadata, methodDescriptor, (err: grpcWeb.RpcError, response: any) =>
+        this.handleUnaryResponse(err, response, requestStartTime),
+      );
     }
-    this._call = call
+    this._call = call;
 
     if (this.protoInfo.isServerStreaming()) {
-      this.handleServerStreaming(call, requestStartTime)
+      this.handleServerStreaming(call, requestStartTime);
     }
 
     return this;
   }
-
 
   /**
    * Cancel request
@@ -447,7 +441,7 @@ export class GRPCWebRequest extends EventEmitter {
     return this;
   }
 
-  commitStream(){ }
+  commitStream() {}
 
   /**
    * Handle server side streaming response
@@ -466,7 +460,8 @@ export class GRPCWebRequest extends EventEmitter {
       if (err && err.code !== 1) {
         this.emit(GRPCEventType.ERROR, this.betterErr(err), responseMetaInformation);
 
-        if (err.code === 2 || err.code === 14) { // Stream Removed.
+        if (err.code === 2 || err.code === 14) {
+          // Stream Removed.
           this.emit(GRPCEventType.END, call);
         }
       }
@@ -501,8 +496,8 @@ export class GRPCWebRequest extends EventEmitter {
     this.emit(GRPCEventType.END);
   }
 
-  private betterErr(err: grpcWeb.RpcError) : Error {
-    return new Error(`full url: ${this._fullUrl}, code: ${err.code}, err: ${err.message}`)
+  private betterErr(err: grpcWeb.RpcError): Error {
+    return new Error(`full url: ${this._fullUrl}, code: ${err.code}, err: ${err.message}`);
   }
 
   /**
@@ -524,14 +519,14 @@ export class GRPCWebRequest extends EventEmitter {
    * @param data
    * @param userMetadata
    */
-  private parseRequestInfo(data: string, userMetadata?: string): { inputs: object, metadata: object } {
+  private parseRequestInfo(data: string, userMetadata?: string): { inputs: object; metadata: object } {
     let inputs = {};
-    let metadata: {[key: string]: any} = {};
+    let metadata: { [key: string]: any } = {};
 
     try {
-      inputs = JSON.parse(data || "{}")
+      inputs = JSON.parse(data || '{}');
     } catch (mayBeError) {
-      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError })
+      const e = new Error("Couldn't parse JSON inputs Invalid json", { cause: mayBeError });
       this.emit(GRPCEventType.ERROR, e, {});
       this.emit(GRPCEventType.END);
       throw e;
@@ -539,9 +534,9 @@ export class GRPCWebRequest extends EventEmitter {
 
     if (userMetadata) {
       try {
-        metadata = JSON.parse(userMetadata || "{}")
+        metadata = JSON.parse(userMetadata || '{}');
       } catch (mayBeError) {
-        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError })
+        const e = new Error("Couldn't parse JSON metadata Invalid json", { cause: mayBeError });
         this.emit(GRPCEventType.ERROR, e, {});
         this.emit(GRPCEventType.END);
         throw e;

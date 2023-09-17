@@ -3,76 +3,86 @@ import { Button, Dialog, DialogBody, Icon, Menu, MenuItem, Popover, Switch, Tool
 
 import { setInteractive, setProtoVisibility, setGrpcWeb } from './actions';
 import { EditorAction } from './Editor';
-import {TLSManager} from "./TLSManager";
+import { TLSManager } from './TLSManager';
 import { ProtoInfo, Certificate } from '../../behaviour';
 
 interface OptionsProps {
-  protoInfo: ProtoInfo
-  dispatch: React.Dispatch<EditorAction>
-  interactiveChecked: boolean
-  grpcWebChecked: boolean
-  onInteractiveChange?: (chcked: boolean) => void
-  tlsSelected?: Certificate
-  onTLSSelected?: (selected?: Certificate) => void
-  onClickExport?: () => void
+  protoInfo: ProtoInfo;
+  dispatch: React.Dispatch<EditorAction>;
+  interactiveChecked: boolean;
+  grpcWebChecked: boolean;
+  onInteractiveChange?: (chcked: boolean) => void;
+  tlsSelected?: Certificate;
+  onTLSSelected?: (selected?: Certificate) => void;
+  onClickExport?: () => void;
 }
 
-export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecked, onInteractiveChange, tlsSelected, onTLSSelected, onClickExport }: OptionsProps) {
-
+export function Options({
+  protoInfo,
+  dispatch,
+  grpcWebChecked,
+  interactiveChecked,
+  onInteractiveChange,
+  tlsSelected,
+  onTLSSelected,
+  onClickExport,
+}: OptionsProps) {
   const [tlsModalVisible, setTlsModalVisible] = React.useState(false);
 
   return (
-    <div style={{...styles.optionContainer, ...styles.inline}}>
+    <div style={{ ...styles.optionContainer, ...styles.inline }}>
+      <div style={{ paddingLeft: 15 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Tooltip placement="bottom" content={tlsSelected ? 'Secure Connection' : 'Unsecure Connection'}>
+            <Icon icon={tlsSelected ? 'lock' : 'unlock'} size={18} color={tlsSelected ? '#28d440' : '#bdbcbc'} />
+          </Tooltip>
+          <span onClick={() => setTlsModalVisible(true)} style={styles.tlsButton}>
+            <span style={{}}>TLS</span>
+          </span>
+        </div>
 
-      <div style={{paddingLeft: 15}}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-          }}>
-            <Tooltip placement="bottom" content={tlsSelected ? "Secure Connection" : "Unsecure Connection"}>
-              <Icon
-                  icon={tlsSelected ? "lock" : "unlock"}
-                  size={18}
-                  color={tlsSelected ? "#28d440" : "#bdbcbc"}
-              />
-            </Tooltip>
-            <span
-              onClick={() => setTlsModalVisible(true)}
-              style={styles.tlsButton}
-            >
-              <span style={{}}>TLS</span>
-            </span>
-          </div>
-
-          <Dialog
-            title="TLS / SSL Manager"
-            icon="key"
-            isOpen={tlsModalVisible}
-            onClose={() => {
-              setTlsModalVisible(false);
-            }}
-            style={{ minWidth: '80%' }}
-          >
-            <DialogBody>
-              <TLSManager selected={tlsSelected} onSelected={onTLSSelected} />
-            </DialogBody>
-          </Dialog>
+        <Dialog
+          title="TLS / SSL Manager"
+          icon="key"
+          isOpen={tlsModalVisible}
+          onClose={() => {
+            setTlsModalVisible(false);
+          }}
+          style={{ minWidth: '80%' }}
+        >
+          <DialogBody>
+            <TLSManager selected={tlsSelected} onSelected={onTLSSelected} />
+          </DialogBody>
+        </Dialog>
       </div>
 
       <div style={{ ...styles.inline }}>
-        <Popover content={(
+        <Popover
+          content={
             <Menu>
-              <MenuItem key="0" text="Export response" onClick={(e) => {
+              <MenuItem
+                key="0"
+                text="Export response"
+                onClick={(e) => {
                   e.preventDefault();
-                  onClickExport && onClickExport()
-              }} />
+                  onClickExport && onClickExport();
+                }}
+              />
             </Menu>
-        )} interactionKind='click' placement='bottom'>
-          <div style={{ marginRight: 5, marginTop: 2, cursor: 'pointer', color: "#b5b5b5"}} >
+          }
+          interactionKind="click"
+          placement="bottom"
+        >
+          <div style={{ marginRight: 5, marginTop: 2, cursor: 'pointer', color: '#b5b5b5' }}>
             <Icon icon="caret-down" />
           </div>
         </Popover>
-        <div style={{paddingRight: 10}}>
+        <div style={{ paddingRight: 10 }}>
           <Switch
             large
             innerLabel="GRPC"
@@ -83,7 +93,7 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
             }}
           />
         </div>
-        <div style={{paddingRight: 10}}>
+        <div style={{ paddingRight: 10 }}>
           <Switch
             large
             innerLabel="Manual"
@@ -97,34 +107,29 @@ export function Options({ protoInfo, dispatch, grpcWebChecked, interactiveChecke
           />
         </div>
 
-        <Button
-          icon="code"
-          outlined
-          text='View Proto'
-          onClick={() => dispatch(setProtoVisibility(true))}
-        />
+        <Button icon="code" outlined text="View Proto" onClick={() => dispatch(setProtoVisibility(true))} />
       </div>
     </div>
-  )
+  );
 }
 
 const styles = {
   optionContainer: {
-    width: "50%",
+    width: '50%',
   },
   inline: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   tlsButton: {
     marginLeft: 10,
-    cursor: "pointer",
-    background: "#fafafa",
-    padding: "1px 10px",
-    borderRadius: "3px",
+    cursor: 'pointer',
+    background: '#fafafa',
+    padding: '1px 10px',
+    borderRadius: '3px',
     fontWeight: 500,
-    fontSize: "13px",
-    border: "1px solid #d8d8d8",
-  }
+    fontSize: '13px',
+    border: '1px solid #d8d8d8',
+  },
 };

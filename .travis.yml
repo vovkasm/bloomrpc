@@ -4,39 +4,39 @@ dist: trusty
 sudo: false
 
 language: node_js
-node_js: "12.4"
+node_js: '12.4'
 
 env:
   global:
-  - ELECTRON_CACHE=$HOME/.cache/electron
-  - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+    - ELECTRON_CACHE=$HOME/.cache/electron
+    - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
 
 matrix:
   include:
-  - os: linux
-  - os: osx
+    - os: linux
+    - os: osx
 
 cache:
   directories:
-  - node_modules
-  - $HOME/.cache/electron
-  - $HOME/.cache/electron-builder
-  - $HOME/.npm/_prebuilds
+    - node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+    - $HOME/.npm/_prebuilds
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm i yarn -g; fi
 
 install:
-- yarn
-- ./node_modules/.bin/electron-rebuild
+  - yarn
+  - ./node_modules/.bin/electron-rebuild
 
 script:
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]]; then npm run package-linux; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" && "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]]; then npm run package; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]]; then npm run package-linux; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST_BRANCH" == "" ]]; then npm run package; fi
 
 before_cache:
-- rm -rf $HOME/.cache/electron-builder/wine
+  - rm -rf $HOME/.cache/electron-builder/wine
 
 branches:
   only:
-  - master
+    - master

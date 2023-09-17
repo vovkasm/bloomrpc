@@ -6,7 +6,8 @@ import {
   setResponse,
   setResponseStreamData,
   setRequestStreamData,
-  addResponseStreamData, setStreamCommitted
+  addResponseStreamData,
+  setStreamCommitted,
 } from './actions';
 import { ControlsStateProps } from './Controls';
 import { GRPCEventType, GRPCRequest, ResponseMetaInformation, GRPCEventEmitter, GRPCWebRequest } from '../../behaviour';
@@ -28,8 +29,8 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   // Play button action:
   dispatch(setIsLoading(true));
 
-  let grpcRequest : GRPCEventEmitter
-  if (state.grpcWeb){
+  let grpcRequest: GRPCEventEmitter;
+  if (state.grpcWeb) {
     grpcRequest = new GRPCWebRequest({
       url: state.url,
       inputs: state.data,
@@ -37,7 +38,7 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
       protoInfo,
       interactive: state.interactive,
       tlsCertificate: state.tlsCertificate,
-    })
+    });
   } else {
     grpcRequest = new GRPCRequest({
       url: state.url,
@@ -63,25 +64,35 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   dispatch(setResponseStreamData([]));
 
   grpcRequest.on(GRPCEventType.ERROR, (e: Error, metaInfo: ResponseMetaInformation) => {
-    dispatch(setResponse({
-      responseTime: metaInfo.responseTime,
-      output: JSON.stringify({
-        error: e.message,
-      }, null, 2)
-    }));
+    dispatch(
+      setResponse({
+        responseTime: metaInfo.responseTime,
+        output: JSON.stringify(
+          {
+            error: e.message,
+          },
+          null,
+          2,
+        ),
+      }),
+    );
   });
 
   grpcRequest.on(GRPCEventType.DATA, (data: object, metaInfo: ResponseMetaInformation) => {
     if (metaInfo.stream && state.interactive) {
-      dispatch(addResponseStreamData({
-        output: JSON.stringify(data, null, 2),
-        responseTime: metaInfo.responseTime,
-      }));
+      dispatch(
+        addResponseStreamData({
+          output: JSON.stringify(data, null, 2),
+          responseTime: metaInfo.responseTime,
+        }),
+      );
     } else {
-      dispatch(setResponse({
-        responseTime: metaInfo.responseTime,
-        output: JSON.stringify(data, null, 2),
-      }));
+      dispatch(
+        setResponse({
+          responseTime: metaInfo.responseTime,
+          output: JSON.stringify(data, null, 2),
+        }),
+      );
     }
   });
 
@@ -99,7 +110,7 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
     toaster.show({
       message: `Error constructing the request: ${e.message}`,
       intent: 'danger',
-    })
+    });
     grpcRequest.emit(GRPCEventType.END);
   }
 };
@@ -108,37 +119,42 @@ export function PlayButton({ dispatch, state, protoInfo, active }: ControlsState
   // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
   // introducing models layer
   const run = React.useCallback(() => {
-    makeRequest({ dispatch, state, protoInfo })
+    makeRequest({ dispatch, state, protoInfo });
   }, [makeRequest, dispatch, state]);
 
-  const hotkeys = React.useMemo<HotkeyConfig[]>(() => [{
-    label: 'Run request',
-    combo: 'mod+enter',
-    allowInInput: true,
-    global: true,
-    onKeyDown: () => {
-      if (!active || state.loading) return;
-      run();
-      return false;
-    }
-  }], [active, state.loading, run]);
+  const hotkeys = React.useMemo<HotkeyConfig[]>(
+    () => [
+      {
+        label: 'Run request',
+        combo: 'mod+enter',
+        allowInInput: true,
+        global: true,
+        onKeyDown: () => {
+          if (!active || state.loading) return;
+          run();
+          return false;
+        },
+      },
+    ],
+    [active, state.loading, run],
+  );
 
   useHotkeys(hotkeys);
 
   return (
     <Icon
-      icon={state.loading ? "pause" : "play"}
+      icon={state.loading ? 'pause' : 'play'}
       size={48}
-      style={{ ...styles.playIcon, ...(state.loading ? { color: "#ea5d5d" } : {}) }}
+      style={{ ...styles.playIcon, ...(state.loading ? { color: '#ea5d5d' } : {}) }}
       onClick={run}
     />
-  )
+  );
 }
 
 const styles = {
   playIcon: {
     fontSize: 50,
-    color: "#28d440",
-    cursor: "pointer",
+    color: '#28d440',
+    cursor: 'pointer',
   },
 };

@@ -1,19 +1,19 @@
 // @ts-ignore
 import Store from 'electron-store';
-import { EditorEnvironment } from "../components/Editor";
+import { EditorEnvironment } from '../components/Editor';
 
-const EnvironmentStore = new Store<{ENVIRONMENTS: EditorEnvironment[]}>({
-  name: "environments",
+const EnvironmentStore = new Store<{ ENVIRONMENTS: EditorEnvironment[] }>({
+  name: 'environments',
 });
 
 const KEYS = {
-  ENVIRONMENTS: "ENVIRONMENTS",
+  ENVIRONMENTS: 'ENVIRONMENTS',
 } as const;
 
 export function saveEnvironment(environment: EditorEnvironment) {
   const environments: EditorEnvironment[] = EnvironmentStore.get(KEYS.ENVIRONMENTS) || [];
 
-  const existingEnvironment = environments.find(env => env.name === environment.name);
+  const existingEnvironment = environments.find((env) => env.name === environment.name);
 
   if (existingEnvironment) {
     const updatedEnvironment = {
@@ -21,17 +21,14 @@ export function saveEnvironment(environment: EditorEnvironment) {
       ...environment,
     };
 
-    const envIndex = environments.findIndex(env => env.name === environment.name);
+    const envIndex = environments.findIndex((env) => env.name === environment.name);
     environments[envIndex] = updatedEnvironment;
 
     EnvironmentStore.set(KEYS.ENVIRONMENTS, environments);
     return;
   }
 
-  EnvironmentStore.set(KEYS.ENVIRONMENTS, [
-    ...environments,
-    environment
-  ]);
+  EnvironmentStore.set(KEYS.ENVIRONMENTS, [...environments, environment]);
 }
 
 export function getEnvironments(): EditorEnvironment[] {
@@ -40,7 +37,10 @@ export function getEnvironments(): EditorEnvironment[] {
 
 export function deleteEnvironment(environmentName: string) {
   const envs = getEnvironments();
-  EnvironmentStore.set(KEYS.ENVIRONMENTS, envs.filter(env => env.name !== environmentName));
+  EnvironmentStore.set(
+    KEYS.ENVIRONMENTS,
+    envs.filter((env) => env.name !== environmentName),
+  );
 }
 
 export function removeAllEnvironments() {

@@ -2,7 +2,9 @@ import * as React from 'react';
 import { useEffect, useReducer } from 'react';
 import {
   actions,
-  setData, setEnvironment, setInteractive,
+  setData,
+  setEnvironment,
+  setInteractive,
   setMetadata,
   setMetadataVisibilty,
   setProtoVisibility,
@@ -22,53 +24,53 @@ import 'ace-builds/src-noconflict/theme-textmate';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-protobuf';
 
-import { exportResponseToJSONFile } from "../../behaviour/response";
-import { Resizable } from "re-resizable";
-import { AddressBar } from "./AddressBar";
-import { deleteEnvironment, getEnvironments, saveEnvironment } from "../../storage/environments";
+import { exportResponseToJSONFile } from '../../behaviour/response';
+import { Resizable } from 're-resizable';
+import { AddressBar } from './AddressBar';
+import { deleteEnvironment, getEnvironments, saveEnvironment } from '../../storage/environments';
 
 export interface EditorAction {
-  [key: string]: any
-  type: string
+  [key: string]: any;
+  type: string;
 }
 
 export interface EditorEnvironment {
-  name: string
-  url: string
-  metadata: string,
-  interactive: boolean
-  tlsCertificate: Certificate,
+  name: string;
+  url: string;
+  metadata: string;
+  interactive: boolean;
+  tlsCertificate: Certificate;
 }
 
 export interface EditorRequest {
-  url: string
-  data: string
-  inputs?: string // @deprecated
-  metadata: string
-  interactive: boolean
-  environment?: string
-  grpcWeb: boolean
-  tlsCertificate?: Certificate
+  url: string;
+  data: string;
+  inputs?: string; // @deprecated
+  metadata: string;
+  interactive: boolean;
+  environment?: string;
+  grpcWeb: boolean;
+  tlsCertificate?: Certificate;
 }
 
 export interface EditorState extends EditorRequest {
-  loading: boolean
-  response: EditorResponse
-  metadataOpened: boolean
-  protoViewVisible: boolean
-  requestStreamData: string[]
-  responseStreamData: EditorResponse[]
-  streamCommitted: boolean
-  call?: GRPCEventEmitter
+  loading: boolean;
+  response: EditorResponse;
+  metadataOpened: boolean;
+  protoViewVisible: boolean;
+  requestStreamData: string[];
+  responseStreamData: EditorResponse[];
+  streamCommitted: boolean;
+  call?: GRPCEventEmitter;
 }
 
 export interface EditorProps {
-  protoInfo?: ProtoInfo
-  onRequestChange?: (editorRequest: EditorRequest & EditorState) => void
-  initialRequest?: EditorRequest
-  environmentList?: EditorEnvironment[]
-  onEnvironmentListChange?: (environmentList: EditorEnvironment[]) => void
-  active?: boolean
+  protoInfo?: ProtoInfo;
+  onRequestChange?: (editorRequest: EditorRequest & EditorState) => void;
+  initialRequest?: EditorRequest;
+  environmentList?: EditorEnvironment[];
+  onEnvironmentListChange?: (environmentList: EditorEnvironment[]) => void;
+  active?: boolean;
 }
 
 export interface EditorResponse {
@@ -77,16 +79,16 @@ export interface EditorResponse {
 }
 
 const INITIAL_STATE: EditorState = {
-  url: "0.0.0.0:3009",
-  data: "",
-  metadata: "",
+  url: '0.0.0.0:3009',
+  data: '',
+  metadata: '',
   requestStreamData: [],
   responseStreamData: [],
   interactive: false,
   grpcWeb: false,
   loading: false,
   response: {
-    output: "",
+    output: '',
     responseTime: undefined,
   },
   metadataOpened: false,
@@ -103,7 +105,6 @@ const INITIAL_STATE: EditorState = {
  */
 const reducer = (state: EditorState, action: EditorAction) => {
   switch (action.type) {
-
     case actions.SET_DATA:
       return { ...state, data: action.data };
 
@@ -153,19 +154,32 @@ const reducer = (state: EditorState, action: EditorAction) => {
       return { ...state, environment: action.environment };
 
     default:
-      return state
+      return state;
   }
 };
 
-export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironmentListChange, environmentList, active }: EditorProps) {
-  const [state, dispatch] = useReducer(reducer, {
-    ...INITIAL_STATE,
-    url: (initialRequest && initialRequest.url) || getUrl() || INITIAL_STATE.url,
-    interactive: initialRequest ? initialRequest.interactive : (protoInfo && protoInfo.usesStream()) || INITIAL_STATE.interactive,
-    grpcWeb: initialRequest ? initialRequest.grpcWeb : INITIAL_STATE.grpcWeb,
-    metadata: (initialRequest && initialRequest.metadata) || getMetadata() || INITIAL_STATE.metadata,
-    environment: (initialRequest && initialRequest.environment),
-  }, undefined);
+export function Editor({
+  protoInfo,
+  initialRequest,
+  onRequestChange,
+  onEnvironmentListChange,
+  environmentList,
+  active,
+}: EditorProps) {
+  const [state, dispatch] = useReducer(
+    reducer,
+    {
+      ...INITIAL_STATE,
+      url: (initialRequest && initialRequest.url) || getUrl() || INITIAL_STATE.url,
+      interactive: initialRequest
+        ? initialRequest.interactive
+        : (protoInfo && protoInfo.usesStream()) || INITIAL_STATE.interactive,
+      grpcWeb: initialRequest ? initialRequest.grpcWeb : INITIAL_STATE.grpcWeb,
+      metadata: (initialRequest && initialRequest.metadata) || getMetadata() || INITIAL_STATE.metadata,
+      environment: initialRequest && initialRequest.environment,
+    },
+    undefined,
+  );
 
   useEffect(() => {
     if (protoInfo && !initialRequest) {
@@ -174,9 +188,17 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
         dispatch(setData(JSON.stringify(plain, null, 2)));
       } catch (e) {
         console.error(e);
-        dispatch(setData(JSON.stringify({
-          "error": "Error parsing the request message, please report the problem sharing the offending protofile"
-        }, null, 2)));
+        dispatch(
+          setData(
+            JSON.stringify(
+              {
+                error: 'Error parsing the request message, please report the problem sharing the offending protofile',
+              },
+              null,
+              2,
+            ),
+          ),
+        );
       }
     }
 
@@ -190,31 +212,32 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
   return (
     <div style={styles.tabContainer}>
       <div style={styles.inputContainer}>
-        <div style={{ width: "60%" }}>
+        <div style={{ width: '60%' }}>
           <AddressBar
-              protoInfo={protoInfo}
-              loading={state.loading}
-              url={state.url}
-              defaultEnvironment={state.environment}
-              environments={environmentList}
-              onChangeEnvironment={(environment) => {
-
-                if (!environment) {
-                  dispatch(setEnvironment(""));
-                  onRequestChange && onRequestChange({
+            protoInfo={protoInfo}
+            loading={state.loading}
+            url={state.url}
+            defaultEnvironment={state.environment}
+            environments={environmentList}
+            onChangeEnvironment={(environment) => {
+              if (!environment) {
+                dispatch(setEnvironment(''));
+                onRequestChange &&
+                  onRequestChange({
                     ...state,
-                    environment: "",
+                    environment: '',
                   });
-                  return;
-                }
+                return;
+              }
 
-                dispatch(setUrl(environment.url));
-                dispatch(setMetadata(environment.metadata));
-                dispatch(setEnvironment(environment.name));
-                dispatch(setTSLCertificate(environment.tlsCertificate));
-                dispatch(setInteractive(environment.interactive));
+              dispatch(setUrl(environment.url));
+              dispatch(setMetadata(environment.metadata));
+              dispatch(setEnvironment(environment.name));
+              dispatch(setTSLCertificate(environment.tlsCertificate));
+              dispatch(setInteractive(environment.interactive));
 
-                onRequestChange && onRequestChange({
+              onRequestChange &&
+                onRequestChange({
                   ...state,
                   environment: environment.name,
                   url: environment.url,
@@ -222,45 +245,44 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
                   tlsCertificate: environment.tlsCertificate,
                   interactive: environment.interactive,
                 });
-              }}
-              onEnvironmentDelete={(environmentName) => {
-                deleteEnvironment(environmentName);
-                dispatch(setEnvironment(""));
-                onRequestChange && onRequestChange({
+            }}
+            onEnvironmentDelete={(environmentName) => {
+              deleteEnvironment(environmentName);
+              dispatch(setEnvironment(''));
+              onRequestChange &&
+                onRequestChange({
                   ...state,
-                  environment: "",
+                  environment: '',
                 });
-                onEnvironmentListChange && onEnvironmentListChange(
-                    getEnvironments()
-                );
-              }}
-              onEnvironmentSave={(environmentName) => {
-                saveEnvironment({
-                  name: environmentName,
-                  url: state.url,
-                  interactive: state.interactive,
-                  metadata: state.metadata,
-                  tlsCertificate: state.tlsCertificate,
-                });
+              onEnvironmentListChange && onEnvironmentListChange(getEnvironments());
+            }}
+            onEnvironmentSave={(environmentName) => {
+              saveEnvironment({
+                name: environmentName,
+                url: state.url,
+                interactive: state.interactive,
+                metadata: state.metadata,
+                tlsCertificate: state.tlsCertificate,
+              });
 
-                dispatch(setEnvironment(environmentName));
-                onRequestChange && onRequestChange({
+              dispatch(setEnvironment(environmentName));
+              onRequestChange &&
+                onRequestChange({
                   ...state,
                   environment: environmentName,
                 });
 
-                onEnvironmentListChange && onEnvironmentListChange(
-                    getEnvironments()
-                );
-              }}
-              onChangeUrl={(e) => {
-                dispatch(setUrl(e.target.value));
-                storeUrl(e.target.value);
-                onRequestChange && onRequestChange({
+              onEnvironmentListChange && onEnvironmentListChange(getEnvironments());
+            }}
+            onChangeUrl={(e) => {
+              dispatch(setUrl(e.target.value));
+              storeUrl(e.target.value);
+              onRequestChange &&
+                onRequestChange({
                   ...state,
                   url: e.target.value,
                 });
-              }}
+            }}
           />
         </div>
 
@@ -271,21 +293,23 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
             grpcWebChecked={state.grpcWeb}
             interactiveChecked={state.interactive}
             onClickExport={async () => {
-              await exportResponseToJSONFile(protoInfo, state)
+              await exportResponseToJSONFile(protoInfo, state);
             }}
             onInteractiveChange={(checked) => {
-              onRequestChange && onRequestChange({
-                ...state,
-                interactive: checked,
-              });
+              onRequestChange &&
+                onRequestChange({
+                  ...state,
+                  interactive: checked,
+                });
             }}
             tlsSelected={state.tlsCertificate}
             onTLSSelected={(certificate) => {
               dispatch(setTSLCertificate(certificate));
-              onRequestChange && onRequestChange({
-                ...state,
-                tlsCertificate: certificate,
-              });
+              onRequestChange &&
+                onRequestChange({
+                  ...state,
+                  tlsCertificate: certificate,
+                });
             }}
           />
         )}
@@ -293,13 +317,13 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
 
       <div style={styles.editorContainer}>
         <Resizable
-            enable={{ right: true }}
-            defaultSize={{
-              width: "50%",
-              height: 'auto',
-            }}
-            maxWidth={"80%"}
-            minWidth={"10%"}
+          enable={{ right: true }}
+          defaultSize={{
+            width: '50%',
+            height: 'auto',
+          }}
+          maxWidth={'80%'}
+          minWidth={'10%'}
         >
           <Request
             data={state.data}
@@ -307,31 +331,26 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
             active={active}
             onChangeData={(value) => {
               dispatch(setData(value));
-              onRequestChange && onRequestChange({
-                ...state,
-                data: value,
-              });
+              onRequestChange &&
+                onRequestChange({
+                  ...state,
+                  data: value,
+                });
             }}
           />
 
-          <div style={{
-            ...styles.playIconContainer,
-            ...(isControlVisible(state) ? styles.streamControlsContainer : {}),
-          }}>
-            <Controls
-                active={active}
-                dispatch={dispatch}
-                state={state}
-                protoInfo={protoInfo}
-            />
+          <div
+            style={{
+              ...styles.playIconContainer,
+              ...(isControlVisible(state) ? styles.streamControlsContainer : {}),
+            }}
+          >
+            <Controls active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
           </div>
         </Resizable>
 
-        <div style={{...styles.responseContainer}}>
-          <Response
-            streamResponse={state.responseStreamData}
-            response={state.response}
-          />
+        <div style={{ ...styles.responseContainer }}>
+          <Response streamResponse={state.responseStreamData} response={state.response} />
         </div>
       </div>
 
@@ -341,10 +360,11 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
         }}
         onMetadataChange={(value) => {
           dispatch(setMetadata(value));
-          onRequestChange && onRequestChange({
-            ...state,
-            metadata: value,
-          });
+          onRequestChange &&
+            onRequestChange({
+              ...state,
+              metadata: value,
+            });
         }}
         value={state.metadata}
       />
@@ -357,48 +377,48 @@ export function Editor({ protoInfo, initialRequest, onRequestChange, onEnvironme
         />
       )}
     </div>
-  )
+  );
 }
 
 const styles = {
   tabContainer: {
-    width: "100%",
-    height: "100%",
-    position: "relative" as "relative",
+    width: '100%',
+    height: '100%',
+    position: 'relative' as 'relative',
   },
   editorContainer: {
-    display: "flex",
-    height: "100%",
-    borderLeft: "1px solid rgba(0, 21, 41, 0.18)",
-    background: "#fff"
+    display: 'flex',
+    height: '100%',
+    borderLeft: '1px solid rgba(0, 21, 41, 0.18)',
+    background: '#fff',
   },
   responseContainer: {
-    background: "white",
-    maxWidth: "inherit",
-    width: "inherit",
-    display: "flex",
-    flex: "1 1 0%",
-    borderLeft: "1px solid #eee",
-    borderRight: "1px solid rgba(0, 21, 41, 0.18)",
-    overflow: "auto"
+    background: 'white',
+    maxWidth: 'inherit',
+    width: 'inherit',
+    display: 'flex',
+    flex: '1 1 0%',
+    borderLeft: '1px solid #eee',
+    borderRight: '1px solid rgba(0, 21, 41, 0.18)',
+    overflow: 'auto',
   },
   playIconContainer: {
-    position: "absolute" as "absolute",
+    position: 'absolute' as 'absolute',
     zIndex: 10,
-    right: "-30px",
-    marginLeft: "-25px",
-    top: "calc(50% - 80px)",
+    right: '-30px',
+    marginLeft: '-25px',
+    top: 'calc(50% - 80px)',
   },
   streamControlsContainer: {
-    right: "-42px",
+    right: '-42px',
   },
   inputContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    border: "1px solid rgba(0, 21, 41, 0.18)",
-    borderBottom: "1px solid #eee",
-    background: "#fafafa",
-    padding: "15px",
-    boxShadow: "2px 0px 4px 0px rgba(0,0,0,0.20)",
+    display: 'flex',
+    justifyContent: 'space-between',
+    border: '1px solid rgba(0, 21, 41, 0.18)',
+    borderBottom: '1px solid #eee',
+    background: '#fafafa',
+    padding: '15px',
+    boxShadow: '2px 0px 4px 0px rgba(0,0,0,0.20)',
   },
 };

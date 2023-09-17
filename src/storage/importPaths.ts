@@ -1,13 +1,12 @@
 // @ts-ignore
-import Store from "electron-store";
+import Store from 'electron-store';
 
-
-const ImportPathsStore = new Store<{paths: string[]}>({
-  name: "importPaths",
+const ImportPathsStore = new Store<{ paths: string[] }>({
+  name: 'importPaths',
 });
 
 const KEYS = {
-  IMPORT_PATH: "paths"
+  IMPORT_PATH: 'paths',
 };
 
 export function storeImportPaths(paths: string[]) {
@@ -15,7 +14,7 @@ export function storeImportPaths(paths: string[]) {
 }
 
 export function getImportPaths(): string[] {
-  return ImportPathsStore.get(KEYS.IMPORT_PATH, [""]);
+  return ImportPathsStore.get(KEYS.IMPORT_PATH, ['']);
 }
 
 export function clearImportPaths() {
