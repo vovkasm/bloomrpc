@@ -4,9 +4,12 @@ import { render } from 'react-dom';
 
 import App from './App';
 import './app.global.css';
+import { Root } from './model';
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
-render(<App />, document.getElementById('root'));
+const model = new Root();
+
+render(<App model={model} />, document.getElementById('root'));
 
 postMessage({ payload: 'removeLoading' }, '*');

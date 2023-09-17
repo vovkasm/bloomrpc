@@ -1,17 +1,14 @@
 import { Button, Card, CardList, Text } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
-import { storeImportPaths } from '../../storage';
+import { useRootModel } from '../../model-provider';
 
-interface PathResolutionProps {
-  onImportsChange?: (paths: string[]) => void;
-  importPaths: string[];
-}
-
-export function PathResolution({ importPaths, onImportsChange }: PathResolutionProps) {
+export const PathResolution = observer(() => {
+  const root = useRootModel();
   return (
     <CardList>
-      {importPaths.sort().map((importPath) => (
+      {root.importPaths.paths.map((importPath) => (
         <Card key={importPath} style={{ display: 'flex', flexDirection: 'row' }}>
           <Text style={{ flex: 1 }}>{importPath}</Text>
           <Button
@@ -19,28 +16,11 @@ export function PathResolution({ importPaths, onImportsChange }: PathResolutionP
             intent="danger"
             icon="delete"
             onClick={() => {
-              removePath(importPath, importPaths, onImportsChange);
+              root.importPaths.remove(importPath);
             }}
           />
         </Card>
       ))}
     </CardList>
   );
-}
-
-export function addImportPath(path: string, importPaths: string[], setImportPath?: (path: string[]) => void): boolean {
-  if (path !== '' && importPaths.indexOf(path) === -1) {
-    const paths = [...importPaths, path];
-    setImportPath && setImportPath(paths);
-    storeImportPaths(paths);
-    return true;
-  }
-
-  return false;
-}
-
-function removePath(path: string, importPaths: string[], setImportPath?: (path: string[]) => void) {
-  const newPaths = importPaths.filter((currentPath) => currentPath !== path);
-  setImportPath && setImportPath(newPaths);
-  storeImportPaths(newPaths);
-}
+});

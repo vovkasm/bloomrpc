@@ -2,15 +2,17 @@ import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-protobuf';
 import 'ace-builds/src-noconflict/theme-textmate';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ProtoFile, ProtoService, loadProtos } from '../behaviour';
+import type { Root } from '../model';
+import { useRootModel } from '../model-provider';
 import {
   EditorTabsStorage,
   deleteRequestInfo,
-  getImportPaths,
   getProtos,
   getRequestInfo,
   getTabs,
@@ -29,7 +31,8 @@ export interface EditorTabs {
   tabs: TabData[];
 }
 
-export function BloomRPC() {
+export const BloomRPC = observer(() => {
+  const root = useRootModel();
   const [protos, setProtosState] = useState<ProtoFile[]>([]);
   const [editorTabs, setEditorTabs] = useState<EditorTabs>({
     activeKey: '0',
@@ -51,7 +54,7 @@ export function BloomRPC() {
 
   // Preload editor with stored data.
   useEffect(() => {
-    hydrateEditor(setProtos, setTabs);
+    hydrateEditor(root, setProtos, setTabs);
   }, []);
 
   return (
@@ -61,7 +64,7 @@ export function BloomRPC() {
           protos={protos}
           onProtoUpload={handleProtoUpload(setProtos, protos)}
           onReload={() => {
-            hydrateEditor(setProtos, setTabs);
+            hydrateEditor(root, setProtos, setTabs);
           }}
           onMethodSelected={handleMethodSelected(editorTabs, setTabs)}
           onDeleteAll={() => {
@@ -117,7 +120,7 @@ export function BloomRPC() {
       </main>
     </div>
   );
-}
+});
 
 /**
  * Hydrate editor from persisted storage
@@ -125,21 +128,21 @@ export function BloomRPC() {
  * @param setEditorTabs
  */
 async function hydrateEditor(
+  root: Root,
   setProtos: React.Dispatch<ProtoFile[]>,
   setEditorTabs: React.Dispatch<EditorTabs>,
 ): Promise<void> {
   const tasks: Array<Promise<boolean>> = [];
   const savedProtos = getProtos();
-  const importPaths = getImportPaths();
 
   if (savedProtos) {
-    tasks.push(loadProtos(savedProtos, importPaths, handleProtoUpload(setProtos, [])).then(() => true));
+    tasks.push(loadProtos(savedProtos, root.importPaths.paths, handleProtoUpload(setProtos, [])).then(() => true));
 
     const savedEditorTabs = getTabs();
     if (savedEditorTabs) {
       const task = async () => {
         try {
-          const tabs = await loadTabs(savedEditorTabs);
+          const tabs = await loadTabs(root, savedEditorTabs);
           setEditorTabs(tabs);
         } catch (_) {
           setEditorTabs({ activeKey: '0', tabs: [] });
@@ -157,19 +160,17 @@ async function hydrateEditor(
  * Load tabs
  * @param editorTabs
  */
-async function loadTabs(editorTabs: EditorTabsStorage): Promise<EditorTabs> {
+async function loadTabs(root: Root, editorTabs: EditorTabsStorage): Promise<EditorTabs> {
   const storedEditTabs: EditorTabs = {
     activeKey: editorTabs.activeKey,
     tabs: [],
   };
 
-  const importPaths = getImportPaths();
-
   const protos = await loadProtos(
     editorTabs.tabs.map((tab) => {
       return tab.protoPath;
     }),
-    importPaths,
+    root.importPaths.paths,
   );
 
   const previousTabs = editorTabs.tabs.map((tab) => {

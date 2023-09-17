@@ -4,8 +4,8 @@ import { ipcRenderer } from 'electron';
 import * as path from 'path';
 import * as protobuf from 'protobufjs';
 import { v4 as uuidv4 } from 'uuid';
-import isURL, { IsURLOptions } from 'validator/lib/isURL';
 
+import type { Root } from '../model';
 import { castToError } from '../utils';
 import { Proto, ProtoFile, ProtoService, ServiceMethodsPayload, walkServices } from './protobuf';
 
@@ -18,9 +18,9 @@ export type OnProtoUpload = (protoFiles: ProtoFile[], err?: Error) => void;
  * @param onProtoUploaded
  * @param importPaths
  */
-export async function importProtos(onProtoUploaded: OnProtoUpload, importPaths?: string[]) {
+export async function importProtos(root: Root, onProtoUploaded: OnProtoUpload) {
   const filePaths = (await ipcRenderer.invoke('open-proto-files')) as string[];
-  await loadProtos(filePaths, importPaths, onProtoUploaded);
+  await loadProtos(filePaths, root.importPaths.paths, onProtoUploaded);
 }
 
 /**
@@ -247,9 +247,4 @@ function parseServices(proto: Proto) {
   });
 
   return services;
-}
-
-export async function importResolvePath(): Promise<string | undefined> {
-  const filePaths = (await ipcRenderer.invoke('open-directory')) as string[];
-  return filePaths[0] || undefined;
 }
