@@ -1,26 +1,18 @@
 import { Button, HTMLTable, InputGroup, Radio } from '@blueprintjs/core';
+import { runInAction } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
-import { Certificate, importCertChain, importPrivateKey, importRootCert } from '../../behaviour';
-import { getTLSList, storeTLSList } from '../../storage';
+import { Certificate } from '../../behaviour';
+import { useRootModel } from '../../model-provider';
 
 interface TLSManagerProps {
   selected?: Certificate;
   onSelected?: (value?: Certificate) => void;
 }
 
-export function TLSManager({ selected, onSelected }: TLSManagerProps) {
-  const [certs, setStateCerts] = React.useState<Certificate[]>([]);
-
-  function setCerts(newCerts: Certificate[]) {
-    setStateCerts(newCerts);
-    storeTLSList(newCerts);
-  }
-
-  React.useEffect(() => {
-    setStateCerts(getTLSList());
-  }, []);
-
+export const TLSManager = observer(({ selected, onSelected }: TLSManagerProps) => {
+  const root = useRootModel();
   return (
     <>
       <Button
@@ -28,9 +20,9 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
         fill
         large
         onClick={async () => {
-          const cert = await handleImportRootCert(certs, setCerts);
-
-          if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
+          const cert = await root.addCertificate();
+          // TODO(vovkasm): fix it
+          if (isCertsEqual(cert, selected)) {
             onSelected && onSelected(cert);
           }
         }}
@@ -51,7 +43,7 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
           </tr>
         </thead>
         <tbody>
-          {certs.map((certificate) => {
+          {root.certs.list.map((certificate) => {
             return (
               <tr key={certificate.rootCert.filePath}>
                 <td>
@@ -85,9 +77,9 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
                         <a
                           onClick={async (e) => {
                             e.preventDefault();
-                            const cert = await handleImportPrivateKey(certificate, certs, setCerts);
-                            if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                              onSelected && onSelected(cert);
+                            root.importPrivateKey(certificate);
+                            if (isCertsEqual(certificate, selected)) {
+                              onSelected && onSelected(certificate);
                             }
                           }}
                         >
@@ -96,15 +88,15 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
                       )}
                     </td>
                     <td>
-                      {certificate.privateKey ? (
-                        <span>{certificate.privateKey?.fileName || '-'}</span>
+                      {certificate.certChain ? (
+                        <span>{certificate.certChain?.fileName || '-'}</span>
                       ) : (
                         <a
                           onClick={async (e) => {
                             e.preventDefault();
-                            const cert = await handleImportCertChain(certificate, certs, setCerts);
-                            if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                              onSelected && onSelected(cert);
+                            root.importCertChain(certificate);
+                            if (isCertsEqual(certificate, selected)) {
+                              onSelected && onSelected(certificate);
                             }
                           }}
                         >
@@ -117,10 +109,11 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
                         placeholder={'ssl target host'}
                         defaultValue={certificate.sslTargetHost}
                         onChange={(e) => {
-                          const cert = setSslTargetHost(e.target.value, certificate, certs, setCerts);
-
-                          if (cert && cert.rootCert.filePath === (selected && selected.rootCert.filePath)) {
-                            onSelected && onSelected(cert);
+                          runInAction(() => {
+                            certificate.sslTargetHost = e.target.value;
+                          });
+                          if (isCertsEqual(certificate, selected)) {
+                            onSelected && onSelected(certificate);
                           }
                         }}
                       />
@@ -131,10 +124,10 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
                         icon="delete"
                         minimal
                         onClick={() => {
-                          if (selected && selected.rootCert.filePath === certificate.rootCert.filePath) {
+                          if (isCertsEqual(certificate, selected)) {
                             onSelected && onSelected();
                           }
-                          deleteCertificateEntry(certificate, certs, setCerts);
+                          root.certs.remove(certificate.rootCert.filePath);
                         }}
                       />
                     </td>
@@ -147,94 +140,8 @@ export function TLSManager({ selected, onSelected }: TLSManagerProps) {
       </HTMLTable>
     </>
   );
-}
+});
 
-async function handleImportRootCert(
-  certs: Certificate[],
-  setCerts: React.Dispatch<Certificate[]>,
-): Promise<Certificate | void> {
-  try {
-    const certificate = await importRootCert();
-    if (!certificate) return;
-
-    const newCerts = certs.filter((cert) => cert.rootCert.filePath !== certificate.rootCert.filePath);
-
-    newCerts.push(certificate);
-
-    setCerts(newCerts);
-
-    return certificate;
-  } catch (e) {
-    // No file selected.
-  }
-}
-
-async function handleImportPrivateKey(
-  certificate: Certificate,
-  certs: Certificate[],
-  setCerts: React.Dispatch<Certificate[]>,
-): Promise<Certificate | void> {
-  try {
-    const privateKey = await importPrivateKey();
-    if (!privateKey) return;
-
-    certificate.privateKey = privateKey;
-
-    const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
-    certs[certIndex] = certificate;
-
-    setCerts(certs);
-    return certificate;
-  } catch (e) {
-    // No file Selected
-  }
-}
-
-async function handleImportCertChain(
-  certificate: Certificate,
-  certs: Certificate[],
-  setCerts: React.Dispatch<Certificate[]>,
-): Promise<Certificate | void> {
-  try {
-    const certChain = await importCertChain();
-    if (!certChain) return;
-
-    certificate.certChain = certChain;
-
-    const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
-    certs[certIndex] = certificate;
-
-    setCerts(certs);
-    return certificate;
-  } catch (e) {
-    // No file Selected
-  }
-}
-
-function deleteCertificateEntry(
-  certificate: Certificate,
-  certs: Certificate[],
-  setCerts: React.Dispatch<Certificate[]>,
-) {
-  const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
-
-  const certificates = [...certs];
-  certificates.splice(certIndex, 1);
-
-  setCerts(certificates);
-}
-
-function setSslTargetHost(
-  value: string,
-  certificate: Certificate,
-  certs: Certificate[],
-  setCerts: React.Dispatch<Certificate[]>,
-): Certificate {
-  const certIndex = certs.findIndex((cert) => cert.rootCert.filePath === certificate.rootCert.filePath);
-  certificate.sslTargetHost = value;
-  certs[certIndex] = certificate;
-
-  setCerts(certs);
-
-  return certificate;
+function isCertsEqual(c1: Certificate | undefined, c2: Certificate | undefined): boolean {
+  return c1 && c2 ? c1.rootCert.filePath === c2.rootCert.filePath : false;
 }
