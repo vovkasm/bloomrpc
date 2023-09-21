@@ -11,8 +11,6 @@ interface TabListProps {
   onChange?: (activeKey: string) => void;
   onDelete?: (activeKey: string) => void;
   onEditorRequestChange?: (requestInfo: EditorTabRequest) => void;
-  environmentList?: EditorEnvironment[];
-  onEnvironmentChange?: () => void;
 }
 
 export interface TabData {
@@ -26,15 +24,7 @@ export interface EditorTabRequest extends EditorRequest {
   id: string;
 }
 
-export function TabList({
-  tabs,
-  activeKey,
-  onChange,
-  onDelete,
-  onEditorRequestChange,
-  environmentList,
-  onEnvironmentChange,
-}: TabListProps) {
+export function TabList({ tabs, activeKey, onChange, onDelete, onEditorRequestChange }: TabListProps) {
   const tabsWithMatchingKey = tabs.filter((tab) => tab.tabKey === activeKey);
 
   const tabActiveKey =
@@ -75,10 +65,8 @@ export function TabList({
                 <Editor
                   key={tab.tabKey}
                   active={tab.tabKey === activeKey}
-                  environmentList={environmentList}
                   protoInfo={new ProtoInfo(tab.service, tab.methodName)}
                   initialRequest={tab.initialRequest}
-                  onEnvironmentListChange={onEnvironmentChange}
                   onRequestChange={(editorRequest) => {
                     onEditorRequestChange && onEditorRequestChange({ id: tab.tabKey, ...editorRequest });
                   }}

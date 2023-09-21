@@ -20,9 +20,7 @@ import {
   storeRequestInfo,
   storeTabs,
 } from '../storage';
-import { getEnvironments } from '../storage/environments';
 import { toaster } from '../toaster';
-import { EditorEnvironment } from './Editor';
 import { Sidebar } from './Sidebar';
 import { TabData, TabList } from './TabList';
 
@@ -38,8 +36,6 @@ export const BloomRPC = observer(() => {
     activeKey: '0',
     tabs: [],
   });
-
-  const [environments, setEnvironments] = useState<EditorEnvironment[]>(getEnvironments());
 
   function setTabs(props: EditorTabs | undefined) {
     const localProps = props || { activeKey: '0', tabs: [] };
@@ -78,10 +74,6 @@ export const BloomRPC = observer(() => {
         <TabList
           tabs={editorTabs.tabs || []}
           activeKey={editorTabs.activeKey}
-          environmentList={environments}
-          onEnvironmentChange={() => {
-            setEnvironments(getEnvironments());
-          }}
           onEditorRequestChange={(editorRequestInfo) => {
             storeRequestInfo(editorRequestInfo);
           }}

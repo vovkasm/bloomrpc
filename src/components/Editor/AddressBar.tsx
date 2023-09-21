@@ -11,16 +11,17 @@ import {
   Popover,
   Spinner,
 } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent } from 'react';
 
 import { ProtoInfo } from '../../behaviour';
+import { useRootModel } from '../../model-provider';
 import { EditorEnvironment } from './Editor';
 import { RequestType } from './RequestType';
 
 export interface AddressBarProps {
   loading: boolean;
   url: string;
-  environments?: EditorEnvironment[];
   protoInfo?: ProtoInfo;
   onChangeUrl?: (e: ChangeEvent<HTMLInputElement>) => void;
   defaultEnvironment?: string;
@@ -29,178 +30,179 @@ export interface AddressBarProps {
   onEnvironmentDelete?: (name: string) => void;
 }
 
-export function AddressBar({
-  loading,
-  url,
-  onChangeUrl,
-  protoInfo,
-  defaultEnvironment,
-  environments,
-  onEnvironmentSave,
-  onChangeEnvironment,
-  onEnvironmentDelete,
-}: AddressBarProps) {
-  const [currentEnvironmentName, setCurrentEnvironmentName] = React.useState<string>(defaultEnvironment || '');
-  const [newEnvironmentName, setNewEnvironmentName] = React.useState<string>('');
+export const AddressBar = observer<AddressBarProps>(
+  ({
+    loading,
+    url,
+    onChangeUrl,
+    protoInfo,
+    defaultEnvironment,
+    onEnvironmentSave,
+    onChangeEnvironment,
+    onEnvironmentDelete,
+  }) => {
+    const root = useRootModel();
 
-  const [confirmedSave, setConfirmedSave] = React.useState(false);
-  const [confirmedDelete, setConfirmedDelete] = React.useState(false);
+    const [currentEnvironmentName, setCurrentEnvironmentName] = React.useState<string>(defaultEnvironment || '');
+    const [newEnvironmentName, setNewEnvironmentName] = React.useState<string>('');
 
-  React.useEffect(() => {
-    if (confirmedSave) {
-      if (newEnvironmentName) {
-        setCurrentEnvironmentName(newEnvironmentName);
-        onEnvironmentSave && onEnvironmentSave(newEnvironmentName);
-      } else {
-        setCurrentEnvironmentName(currentEnvironmentName);
-        onEnvironmentSave && onEnvironmentSave(currentEnvironmentName);
+    const [confirmedSave, setConfirmedSave] = React.useState(false);
+    const [confirmedDelete, setConfirmedDelete] = React.useState(false);
+
+    React.useEffect(() => {
+      if (confirmedSave) {
+        if (newEnvironmentName) {
+          setCurrentEnvironmentName(newEnvironmentName);
+          onEnvironmentSave && onEnvironmentSave(newEnvironmentName);
+        } else {
+          setCurrentEnvironmentName(currentEnvironmentName);
+          onEnvironmentSave && onEnvironmentSave(currentEnvironmentName);
+        }
+
+        setConfirmedSave(false);
+        setNewEnvironmentName('');
       }
+    }, [confirmedSave]);
 
-      setConfirmedSave(false);
-      setNewEnvironmentName('');
-    }
-  }, [confirmedSave]);
+    React.useEffect(() => {
+      if (confirmedDelete) {
+        onEnvironmentDelete && onEnvironmentDelete(currentEnvironmentName);
 
-  React.useEffect(() => {
-    if (confirmedDelete) {
-      onEnvironmentDelete && onEnvironmentDelete(currentEnvironmentName);
+        setConfirmedDelete(false);
+        setCurrentEnvironmentName('');
+      }
+    }, [confirmedDelete]);
 
-      setConfirmedDelete(false);
-      setCurrentEnvironmentName('');
-    }
-  }, [confirmedDelete]);
+    const [updateEnvironmentDialogVisible, setUpdateEnvironmentDialogVisible] = React.useState(false);
+    const [deleteEnvironmentDialogVisible, setDeleteEnvironmentDialogVisible] = React.useState(false);
+    const [addEnvironmentDialogVisible, setAddEnvironmentDialogVisible] = React.useState(false);
 
-  const [updateEnvironmentDialogVisible, setUpdateEnvironmentDialogVisible] = React.useState(false);
-  const [deleteEnvironmentDialogVisible, setDeleteEnvironmentDialogVisible] = React.useState(false);
-  const [addEnvironmentDialogVisible, setAddEnvironmentDialogVisible] = React.useState(false);
-
-  return (
-    <ControlGroup>
-      <Alert
-        icon="document"
-        isOpen={updateEnvironmentDialogVisible}
-        intent="primary"
-        cancelButtonText="Cancel"
-        onClose={(confirmed) => {
-          if (confirmed) {
-            setConfirmedSave(true);
+    return (
+      <ControlGroup>
+        <Alert
+          icon="document"
+          isOpen={updateEnvironmentDialogVisible}
+          intent="primary"
+          cancelButtonText="Cancel"
+          onClose={(confirmed) => {
+            if (confirmed) {
+              setConfirmedSave(true);
+            }
+            setUpdateEnvironmentDialogVisible(false);
+          }}
+        >
+          <DialogBody>Do you want to update {currentEnvironmentName}?</DialogBody>
+        </Alert>
+        <Alert
+          icon="delete"
+          isOpen={deleteEnvironmentDialogVisible}
+          intent="danger"
+          cancelButtonText="Cancel"
+          onClose={(confirmed) => {
+            if (confirmed) {
+              setConfirmedDelete(true);
+            }
+            setDeleteEnvironmentDialogVisible(false);
+          }}
+        >
+          <DialogBody>Are you sure do you want to delete {currentEnvironmentName}?</DialogBody>
+        </Alert>
+        <Alert
+          icon="document"
+          isOpen={addEnvironmentDialogVisible}
+          intent="primary"
+          cancelButtonText="Cancel"
+          onClose={(confirmed) => {
+            if (confirmed) {
+              setConfirmedSave(true);
+            }
+            setAddEnvironmentDialogVisible(false);
+          }}
+        >
+          <DialogBody>
+            <InputGroup
+              autoFocus={true}
+              required
+              placeholder={'Environment name'}
+              onChange={(e) => {
+                setNewEnvironmentName(e.target.value);
+              }}
+            />
+          </DialogBody>
+        </Alert>
+        <Popover
+          content={
+            <Menu>
+              <MenuItem
+                text="None"
+                onClick={() => {
+                  setCurrentEnvironmentName('');
+                  onChangeEnvironment && onChangeEnvironment(undefined);
+                }}
+              />
+              {root.environments.list.map((environment) => (
+                <MenuItem
+                  key={environment.name}
+                  text={environment.name}
+                  onClick={() => {
+                    setCurrentEnvironmentName(environment.name);
+                    onChangeEnvironment && onChangeEnvironment(environment);
+                  }}
+                />
+              ))}
+              <MenuDivider />
+              {currentEnvironmentName ? (
+                <MenuItem
+                  text="Update Environment"
+                  icon="edit"
+                  onClick={() => {
+                    setUpdateEnvironmentDialogVisible(true);
+                  }}
+                />
+              ) : null}
+              {currentEnvironmentName ? (
+                <MenuItem
+                  text="Delete Environment"
+                  icon="delete"
+                  onClick={() => {
+                    setDeleteEnvironmentDialogVisible(true);
+                  }}
+                />
+              ) : null}
+              <MenuItem
+                text="Save New Environment"
+                icon="add"
+                onClick={() => {
+                  setAddEnvironmentDialogVisible(true);
+                }}
+              />
+            </Menu>
           }
-          setUpdateEnvironmentDialogVisible(false);
-        }}
-      >
-        <DialogBody>Do you want to update {currentEnvironmentName}?</DialogBody>
-      </Alert>
-      <Alert
-        icon="delete"
-        isOpen={deleteEnvironmentDialogVisible}
-        intent="danger"
-        cancelButtonText="Cancel"
-        onClose={(confirmed) => {
-          if (confirmed) {
-            setConfirmedDelete(true);
-          }
-          setDeleteEnvironmentDialogVisible(false);
-        }}
-      >
-        <DialogBody>Are you sure do you want to delete {currentEnvironmentName}?</DialogBody>
-      </Alert>
-      <Alert
-        icon="document"
-        isOpen={addEnvironmentDialogVisible}
-        intent="primary"
-        cancelButtonText="Cancel"
-        onClose={(confirmed) => {
-          if (confirmed) {
-            setConfirmedSave(true);
-          }
-          setAddEnvironmentDialogVisible(false);
-        }}
-      >
-        <DialogBody>
-          <InputGroup
-            autoFocus={true}
-            required
-            placeholder={'Environment name'}
-            onChange={(e) => {
-              setNewEnvironmentName(e.target.value);
-            }}
+          placement="bottom"
+          targetProps={{ style: { width: '20%' } }}
+        >
+          <AnchorButton
+            fill
+            alignText="left"
+            text={currentEnvironmentName || 'None'}
+            rightIcon="caret-down"
+            style={{ overflow: 'hidden' }}
           />
-        </DialogBody>
-      </Alert>
-      <Popover
-        content={
-          <Menu>
-            <MenuItem
-              text="None"
-              onClick={() => {
-                setCurrentEnvironmentName('');
-                onChangeEnvironment && onChangeEnvironment(undefined);
-              }}
-            />
-            {environments
-              ? environments.map((environment) => (
-                  <MenuItem
-                    key={environment.name}
-                    text={environment.name}
-                    onClick={() => {
-                      setCurrentEnvironmentName(environment.name);
-                      onChangeEnvironment && onChangeEnvironment(environment);
-                    }}
-                  />
-                ))
-              : null}
-            <MenuDivider />
-            {currentEnvironmentName ? (
-              <MenuItem
-                text="Update Environment"
-                icon="edit"
-                onClick={() => {
-                  setUpdateEnvironmentDialogVisible(true);
-                }}
-              />
-            ) : null}
-            {currentEnvironmentName ? (
-              <MenuItem
-                text="Delete Environment"
-                icon="delete"
-                onClick={() => {
-                  setDeleteEnvironmentDialogVisible(true);
-                }}
-              />
-            ) : null}
-            <MenuItem
-              text="Save New Environment"
-              icon="add"
-              onClick={() => {
-                setAddEnvironmentDialogVisible(true);
-              }}
-            />
-          </Menu>
-        }
-        placement="bottom"
-        targetProps={{ style: { width: '20%' } }}
-      >
-        <AnchorButton
-          fill
-          alignText="left"
-          text={currentEnvironmentName || 'None'}
-          rightIcon="caret-down"
-          style={{ overflow: 'hidden' }}
-        />
-      </Popover>
+        </Popover>
 
-      <InputGroup
-        fill
-        className="server-url"
-        rightElement={
-          <div style={{ display: 'flex', alignItems: 'center', width: '125px' }}>
-            {loading ? <Spinner size={20} /> : <Icon icon="database" />}
-            <RequestType protoInfo={protoInfo} />
-          </div>
-        }
-        value={url}
-        onChange={onChangeUrl}
-      />
-    </ControlGroup>
-  );
-}
+        <InputGroup
+          fill
+          className="server-url"
+          rightElement={
+            <div style={{ display: 'flex', alignItems: 'center', width: '125px' }}>
+              {loading ? <Spinner size={20} /> : <Icon icon="database" />}
+              <RequestType protoInfo={protoInfo} />
+            </div>
+          }
+          value={url}
+          onChange={onChangeUrl}
+        />
+      </ControlGroup>
+    );
+  },
+);

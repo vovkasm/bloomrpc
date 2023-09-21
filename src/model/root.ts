@@ -3,11 +3,13 @@ import { makeAutoObservable } from 'mobx';
 import { basename } from 'path';
 
 import { CertFile, Certificate, Certs } from './certs';
+import { Environments } from './environments';
 import { ImportPaths } from './import-paths';
 
 export class Root {
   readonly certs = new Certs();
   readonly importPaths = new ImportPaths();
+  readonly environments = new Environments();
 
   constructor() {
     makeAutoObservable(this);

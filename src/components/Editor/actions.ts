@@ -18,7 +18,7 @@ const actions = {
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
   SET_SSL_CERTIFICATE: 'SET_SSL_CERTIFICATE',
   SET_ENVIRONMENT: 'SET_ENVIRONMENT',
-};
+} as const;
 
 export function setUrl(value: string) {
   return { type: actions.SET_URL, value };

@@ -1,11 +1,12 @@
+import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
 
 import { Certificate, GRPCEventEmitter, ProtoInfo } from '../../behaviour';
 import { exportResponseToJSONFile } from '../../behaviour/response';
+import { useRootModel } from '../../model-provider';
 import { getMetadata, getUrl, storeUrl } from '../../storage';
-import { deleteEnvironment, getEnvironments, saveEnvironment } from '../../storage/environments';
 import { AddressBar } from './AddressBar';
 import { Controls, isControlVisible } from './Controls';
 import { Metadata } from './Metadata';
@@ -64,8 +65,6 @@ export interface EditorProps {
   protoInfo?: ProtoInfo;
   onRequestChange?: (editorRequest: EditorRequest & EditorState) => void;
   initialRequest?: EditorRequest;
-  environmentList?: EditorEnvironment[];
-  onEnvironmentListChange?: (environmentList: EditorEnvironment[]) => void;
   active?: boolean;
 }
 
@@ -154,14 +153,9 @@ const reducer = (state: EditorState, action: EditorAction) => {
   }
 };
 
-export function Editor({
-  protoInfo,
-  initialRequest,
-  onRequestChange,
-  onEnvironmentListChange,
-  environmentList,
-  active,
-}: EditorProps) {
+export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequestChange, active }) => {
+  const root = useRootModel();
+
   const [state, dispatch] = useReducer(
     reducer,
     {
@@ -214,7 +208,6 @@ export function Editor({
             loading={state.loading}
             url={state.url}
             defaultEnvironment={state.environment}
-            environments={environmentList}
             onChangeEnvironment={(environment) => {
               if (!environment) {
                 dispatch(setEnvironment(''));
@@ -243,17 +236,16 @@ export function Editor({
                 });
             }}
             onEnvironmentDelete={(environmentName) => {
-              deleteEnvironment(environmentName);
+              root.environments.delete(environmentName);
               dispatch(setEnvironment(''));
               onRequestChange &&
                 onRequestChange({
                   ...state,
                   environment: '',
                 });
-              onEnvironmentListChange && onEnvironmentListChange(getEnvironments());
             }}
             onEnvironmentSave={(environmentName) => {
-              saveEnvironment({
+              root.environments.updateOrCreate({
                 name: environmentName,
                 url: state.url,
                 interactive: state.interactive,
@@ -267,8 +259,6 @@ export function Editor({
                   ...state,
                   environment: environmentName,
                 });
-
-              onEnvironmentListChange && onEnvironmentListChange(getEnvironments());
             }}
             onChangeUrl={(e) => {
               dispatch(setUrl(e.target.value));
@@ -374,7 +364,7 @@ export function Editor({
       )}
     </div>
   );
-}
+});
 
 const styles = {
   tabContainer: {
