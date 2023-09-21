@@ -3,8 +3,9 @@ import { Resizable } from 're-resizable';
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
 
-import { Certificate, GRPCEventEmitter, ProtoInfo } from '../../behaviour';
+import { GRPCEventEmitter, ProtoInfo } from '../../behaviour';
 import { exportResponseToJSONFile } from '../../behaviour/response';
+import type { Certificate } from '../../model';
 import { useRootModel } from '../../model-provider';
 import { getMetadata, getUrl, storeUrl } from '../../storage';
 import { AddressBar } from './AddressBar';

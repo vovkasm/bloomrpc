@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as grpcWeb from 'grpc-web';
 
-import { Certificate } from './importCertificates';
+import type { Certificate } from '../model';
 import { ProtoInfo } from './protoInfo';
 
 export interface GRPCEventEmitter extends EventEmitter {

@@ -3,7 +3,7 @@ import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
-import { Certificate } from '../../behaviour';
+import type { Certificate } from '../../model';
 import { useRootModel } from '../../model-provider';
 
 interface TLSManagerProps {

@@ -1,4 +1,5 @@
-import { Certificate, GRPCEventEmitter } from '../../behaviour';
+import { GRPCEventEmitter } from '../../behaviour';
+import type { Certificate } from '../../model';
 import { EditorResponse } from './Editor';
 
 const actions = {
