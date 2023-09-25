@@ -125,10 +125,10 @@ async function hydrateEditor(
   setEditorTabs: React.Dispatch<EditorTabs>,
 ): Promise<void> {
   const tasks: Array<Promise<boolean>> = [];
-  const savedProtos = getProtos();
+  const filePaths = getProtos();
 
-  if (savedProtos) {
-    tasks.push(loadProtos(savedProtos, root.importPaths.paths, handleProtoUpload(setProtos, [])).then(() => true));
+  if (filePaths) {
+    tasks.push(loadProtos(filePaths, root.importPaths.paths, handleProtoUpload(setProtos, [])).then(() => true));
 
     const savedEditorTabs = getTabs();
     if (savedEditorTabs) {

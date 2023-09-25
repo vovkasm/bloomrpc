@@ -9,7 +9,7 @@ import type { Root } from '../model';
 import { castToError } from '../utils';
 import { Proto, ProtoFile, ProtoService, ServiceMethodsPayload, walkServices } from './protobuf';
 
-const commonProtosPath = [path.join(path.join(__dirname, '../..'))];
+const commonProtosPath = [path.join(__dirname, '../..')];
 
 export type OnProtoUpload = (protoFiles: ProtoFile[], err?: Error) => void;
 
@@ -51,7 +51,7 @@ export async function loadProtos(
           fileName: path.basename(filePath),
           filePath,
           protoText: '',
-          ast: ast as any,
+          ast,
           root,
         };
         return proto;
@@ -63,11 +63,7 @@ export async function loadProtos(
       const services = parseServices(proto);
 
       // Proto file
-      list.push({
-        proto,
-        fileName: proto.fileName.split(path.sep).pop() || '',
-        services,
-      });
+      list.push({ proto, fileName: proto.fileName, services });
 
       return list;
     }, []);
