@@ -3,7 +3,6 @@ import type { Certificate } from '../../model';
 import { EditorResponse } from './Editor';
 
 const actions = {
-  SET_URL: 'SET_URL',
   SET_DATA: 'SET_DATA',
   SET_IS_LOADING: 'SET_IS_LOADING',
   SET_RESPONSE: 'SET_RESPONSE',
@@ -20,10 +19,6 @@ const actions = {
   SET_SSL_CERTIFICATE: 'SET_SSL_CERTIFICATE',
   SET_ENVIRONMENT: 'SET_ENVIRONMENT',
 } as const;
-
-export function setUrl(value: string) {
-  return { type: actions.SET_URL, value };
-}
 
 export function setData(data: string) {
   return { type: actions.SET_DATA, data };

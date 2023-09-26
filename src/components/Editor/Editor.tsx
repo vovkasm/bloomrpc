@@ -1,4 +1,5 @@
-import { observer } from 'mobx-react-lite';
+import { makeAutoObservable } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
@@ -24,7 +25,6 @@ import {
   setMetadataVisibilty,
   setProtoVisibility,
   setTSLCertificate,
-  setUrl,
 } from './actions';
 
 export interface EditorAction {
@@ -51,7 +51,35 @@ export interface EditorRequest {
   tlsCertificate?: Certificate;
 }
 
-export interface EditorState extends EditorRequest {
+export interface EditorState {
+  url: string;
+  data: string;
+  inputs?: string; // @deprecated
+  metadata: string;
+  interactive: boolean;
+  environment?: string;
+  grpcWeb: boolean;
+  tlsCertificate?: Certificate;
+
+  loading: boolean;
+  response: EditorResponse;
+  metadataOpened: boolean;
+  protoViewVisible: boolean;
+  requestStreamData: string[];
+  responseStreamData: EditorResponse[];
+  streamCommitted: boolean;
+  call?: GRPCEventEmitter;
+}
+
+interface EditorOldState {
+  data: string;
+  inputs?: string; // @deprecated
+  metadata: string;
+  interactive: boolean;
+  environment?: string;
+  grpcWeb: boolean;
+  tlsCertificate?: Certificate;
+
   loading: boolean;
   response: EditorResponse;
   metadataOpened: boolean;
@@ -74,8 +102,7 @@ export interface EditorResponse {
   responseTime?: number;
 }
 
-const INITIAL_STATE: EditorState = {
-  url: '0.0.0.0:3009',
+const INITIAL_STATE: EditorOldState = {
   data: '',
   metadata: '',
   requestStreamData: [],
@@ -99,13 +126,10 @@ const INITIAL_STATE: EditorState = {
  * @param state
  * @param action
  */
-const reducer = (state: EditorState, action: EditorAction) => {
+const reducer = (state: EditorOldState, action: EditorAction): EditorOldState => {
   switch (action.type) {
     case actions.SET_DATA:
       return { ...state, data: action.data };
-
-    case actions.SET_URL:
-      return { ...state, url: action.value };
 
     case actions.SET_IS_LOADING:
       return { ...state, loading: action.isLoading };
@@ -154,14 +178,42 @@ const reducer = (state: EditorState, action: EditorAction) => {
   }
 };
 
+type EditorViewModelInit = {
+  url: string;
+};
+
+class EditorViewModel {
+  url: string;
+
+  constructor(init: EditorViewModelInit) {
+    this.url = init.url;
+    makeAutoObservable(this);
+  }
+
+  setUrl(url: string) {
+    this.url = url;
+  }
+
+  toJSON() {
+    return {
+      url: this.url,
+    };
+  }
+}
 export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequestChange, active }) => {
   const root = useRootModel();
+
+  const viewModel = useLocalObservable(
+    () =>
+      new EditorViewModel({
+        url: initialRequest?.url || getUrl() || '0.0.0.0:3009',
+      }),
+  );
 
   const [state, dispatch] = useReducer(
     reducer,
     {
       ...INITIAL_STATE,
-      url: (initialRequest && initialRequest.url) || getUrl() || INITIAL_STATE.url,
       interactive: initialRequest
         ? initialRequest.interactive
         : (protoInfo && protoInfo.usesStream()) || INITIAL_STATE.interactive,
@@ -207,7 +259,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           <AddressBar
             protoInfo={protoInfo}
             loading={state.loading}
-            url={state.url}
+            url={viewModel.url}
             defaultEnvironment={state.environment}
             onChangeEnvironment={(environment) => {
               if (!environment) {
@@ -215,12 +267,13 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
                 onRequestChange &&
                   onRequestChange({
                     ...state,
+                    ...viewModel.toJSON(),
                     environment: '',
                   });
                 return;
               }
 
-              dispatch(setUrl(environment.url));
+              viewModel.setUrl(environment.url);
               dispatch(setMetadata(environment.metadata));
               dispatch(setEnvironment(environment.name));
               dispatch(setTSLCertificate(environment.tlsCertificate));
@@ -229,6 +282,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   environment: environment.name,
                   url: environment.url,
                   metadata: environment.metadata,
@@ -242,31 +296,34 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   environment: '',
                 });
             }}
             onEnvironmentSave={(environmentName) => {
               root.environments.updateOrCreate({
                 name: environmentName,
-                url: state.url,
+                url: viewModel.url,
                 interactive: state.interactive,
                 metadata: state.metadata,
-                tlsCertificate: state.tlsCertificate,
+                tlsCertificate: state.tlsCertificate!,
               });
 
               dispatch(setEnvironment(environmentName));
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   environment: environmentName,
                 });
             }}
             onChangeUrl={(e) => {
-              dispatch(setUrl(e.target.value));
+              viewModel.setUrl(e.target.value);
               storeUrl(e.target.value);
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   url: e.target.value,
                 });
             }}
@@ -280,12 +337,13 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             grpcWebChecked={state.grpcWeb}
             interactiveChecked={state.interactive}
             onClickExport={async () => {
-              await exportResponseToJSONFile(protoInfo, state);
+              await exportResponseToJSONFile(protoInfo, { ...state, ...viewModel.toJSON() });
             }}
             onInteractiveChange={(checked) => {
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   interactive: checked,
                 });
             }}
@@ -295,6 +353,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   tlsCertificate: certificate,
                 });
             }}
@@ -321,6 +380,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               onRequestChange &&
                 onRequestChange({
                   ...state,
+                  ...viewModel.toJSON(),
                   data: value,
                 });
             }}
@@ -329,10 +389,15 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           <div
             style={{
               ...styles.playIconContainer,
-              ...(isControlVisible(state) ? styles.streamControlsContainer : {}),
+              ...(isControlVisible({ ...state, ...viewModel.toJSON() }) ? styles.streamControlsContainer : {}),
             }}
           >
-            <Controls active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
+            <Controls
+              active={active}
+              dispatch={dispatch}
+              state={{ ...state, ...viewModel.toJSON() }}
+              protoInfo={protoInfo}
+            />
           </div>
         </Resizable>
 
@@ -350,6 +415,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           onRequestChange &&
             onRequestChange({
               ...state,
+              ...viewModel.toJSON(),
               metadata: value,
             });
         }}
