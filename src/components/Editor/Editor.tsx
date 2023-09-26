@@ -20,8 +20,6 @@ import {
   actions,
   setData,
   setEnvironment,
-  setInteractive,
-  setMetadata,
   setMetadataVisibilty,
   setProtoVisibility,
   setTSLCertificate,
@@ -74,10 +72,7 @@ export interface EditorState {
 interface EditorOldState {
   data: string;
   inputs?: string; // @deprecated
-  metadata: string;
-  interactive: boolean;
   environment?: string;
-  grpcWeb: boolean;
   tlsCertificate?: Certificate;
 
   loading: boolean;
@@ -104,11 +99,8 @@ export interface EditorResponse {
 
 const INITIAL_STATE: EditorOldState = {
   data: '',
-  metadata: '',
   requestStreamData: [],
   responseStreamData: [],
-  interactive: false,
-  grpcWeb: false,
   loading: false,
   response: {
     output: '',
@@ -143,17 +135,8 @@ const reducer = (state: EditorOldState, action: EditorAction): EditorOldState =>
     case actions.SET_METADATA_VISIBILITY:
       return { ...state, metadataOpened: action.visible };
 
-    case actions.SET_METADATA:
-      return { ...state, metadata: action.metadata };
-
     case actions.SET_PROTO_VISIBILITY:
       return { ...state, protoViewVisible: action.visible };
-
-    case actions.SET_INTERACTIVE:
-      return { ...state, interactive: action.interactive };
-
-    case actions.SET_GRPC_WEB:
-      return { ...state, grpcWeb: action.grpcWeb };
 
     case actions.SET_REQUEST_STREAM_DATA:
       return { ...state, requestStreamData: action.requestData };
@@ -180,13 +163,22 @@ const reducer = (state: EditorOldState, action: EditorAction): EditorOldState =>
 
 type EditorViewModelInit = {
   url: string;
+  interactive: boolean;
+  metadata: string;
+  grpcWeb: boolean;
 };
 
-class EditorViewModel {
+export class EditorViewModel {
   url: string;
+  interactive: boolean;
+  metadata: string;
+  grpcWeb: boolean;
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
+    this.interactive = init.interactive;
+    this.metadata = init.metadata;
+    this.grpcWeb = init.grpcWeb;
     makeAutoObservable(this);
   }
 
@@ -194,9 +186,24 @@ class EditorViewModel {
     this.url = url;
   }
 
+  setInteractive(val: boolean) {
+    this.interactive = val;
+  }
+
+  setMetadata(val: string) {
+    this.metadata = val;
+  }
+
+  setGrpcWeb(val: boolean) {
+    this.grpcWeb = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
+      interactive: this.interactive,
+      metadata: this.metadata,
+      grpcWeb: this.grpcWeb,
     };
   }
 }
@@ -207,6 +214,9 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
     () =>
       new EditorViewModel({
         url: initialRequest?.url || getUrl() || '0.0.0.0:3009',
+        interactive: initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false,
+        metadata: initialRequest?.metadata || getMetadata() || '',
+        grpcWeb: initialRequest?.grpcWeb ?? false,
       }),
   );
 
@@ -214,11 +224,6 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
     reducer,
     {
       ...INITIAL_STATE,
-      interactive: initialRequest
-        ? initialRequest.interactive
-        : (protoInfo && protoInfo.usesStream()) || INITIAL_STATE.interactive,
-      grpcWeb: initialRequest ? initialRequest.grpcWeb : INITIAL_STATE.grpcWeb,
-      metadata: (initialRequest && initialRequest.metadata) || getMetadata() || INITIAL_STATE.metadata,
       environment: initialRequest && initialRequest.environment,
     },
     undefined,
@@ -247,7 +252,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
 
     if (initialRequest) {
       dispatch(setData(initialRequest.inputs || initialRequest.data));
-      dispatch(setMetadata(initialRequest.metadata));
+      viewModel.setMetadata(initialRequest.metadata);
       dispatch(setTSLCertificate(initialRequest.tlsCertificate));
     }
   }, []);
@@ -274,10 +279,10 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               }
 
               viewModel.setUrl(environment.url);
-              dispatch(setMetadata(environment.metadata));
+              viewModel.setMetadata(environment.metadata);
               dispatch(setEnvironment(environment.name));
               dispatch(setTSLCertificate(environment.tlsCertificate));
-              dispatch(setInteractive(environment.interactive));
+              viewModel.setInteractive(environment.interactive);
 
               onRequestChange &&
                 onRequestChange({
@@ -304,8 +309,8 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               root.environments.updateOrCreate({
                 name: environmentName,
                 url: viewModel.url,
-                interactive: state.interactive,
-                metadata: state.metadata,
+                interactive: viewModel.interactive,
+                metadata: viewModel.metadata,
                 tlsCertificate: state.tlsCertificate!,
               });
 
@@ -332,20 +337,13 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
 
         {protoInfo && (
           <Options
-            protoInfo={protoInfo}
+            viewModel={viewModel}
             dispatch={dispatch}
-            grpcWebChecked={state.grpcWeb}
-            interactiveChecked={state.interactive}
             onClickExport={async () => {
               await exportResponseToJSONFile(protoInfo, { ...state, ...viewModel.toJSON() });
             }}
             onInteractiveChange={(checked) => {
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  interactive: checked,
-                });
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
             tlsSelected={state.tlsCertificate}
             onTLSSelected={(certificate) => {
@@ -411,7 +409,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           dispatch(setMetadataVisibilty(!state.metadataOpened));
         }}
         onMetadataChange={(value) => {
-          dispatch(setMetadata(value));
+          viewModel.setMetadata(value);
           onRequestChange &&
             onRequestChange({
               ...state,
@@ -419,7 +417,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               metadata: value,
             });
         }}
-        value={state.metadata}
+        value={viewModel.metadata}
       />
 
       {protoInfo && (

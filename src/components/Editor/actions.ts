@@ -7,11 +7,8 @@ const actions = {
   SET_IS_LOADING: 'SET_IS_LOADING',
   SET_RESPONSE: 'SET_RESPONSE',
   SET_CALL: 'SET_CALL',
-  SET_METADATA: 'SET_METADATA',
   SET_METADATA_VISIBILITY: 'SET_METADATA_VISIBILITY',
   SET_PROTO_VISIBILITY: 'SET_PROTO_VIEW',
-  SET_INTERACTIVE: 'SET_INTERACTIVE',
-  SET_GRPC_WEB: 'SET_GRPC_WEB',
   SET_REQUEST_STREAM_DATA: 'SET_REQUEST_STREAM_DATA',
   SET_RESPONSE_STREAM_DATA: 'SET_RESPONSE_STREAM_DATA',
   ADD_RESPONSE_STREAM_DATA: 'ADD_RESPONSE_STREAM_DATA',
@@ -36,24 +33,12 @@ export function setCall(call?: GRPCEventEmitter) {
   return { type: actions.SET_CALL, call };
 }
 
-export function setMetadata(metadata: string) {
-  return { type: actions.SET_METADATA, metadata };
-}
-
 export function setMetadataVisibilty(visible: boolean) {
   return { type: actions.SET_METADATA_VISIBILITY, visible };
 }
 
 export function setProtoVisibility(visible: boolean) {
   return { type: actions.SET_PROTO_VISIBILITY, visible };
-}
-
-export function setGrpcWeb(grpcWeb: boolean) {
-  return { type: actions.SET_GRPC_WEB, grpcWeb };
-}
-
-export function setInteractive(interactive: boolean) {
-  return { type: actions.SET_INTERACTIVE, interactive };
 }
 
 export function setRequestStreamData(requestData: string[]) {

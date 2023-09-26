@@ -1,32 +1,28 @@
 import { Button, Dialog, DialogBody, Icon, Menu, MenuItem, Popover, Switch, Tooltip } from '@blueprintjs/core';
 import React from 'react';
 
-import { ProtoInfo } from '../../behaviour';
 import type { Certificate } from '../../model';
 import { EditorAction } from './Editor';
+import type { EditorViewModel } from './Editor';
 import { TLSManager } from './TLSManager';
-import { setGrpcWeb, setInteractive, setProtoVisibility } from './actions';
+import { setProtoVisibility } from './actions';
 
 interface OptionsProps {
-  protoInfo: ProtoInfo;
   dispatch: React.Dispatch<EditorAction>;
-  interactiveChecked: boolean;
-  grpcWebChecked: boolean;
   onInteractiveChange?: (chcked: boolean) => void;
   tlsSelected?: Certificate;
   onTLSSelected?: (selected?: Certificate) => void;
   onClickExport?: () => void;
+  viewModel: EditorViewModel;
 }
 
 export function Options({
-  protoInfo,
   dispatch,
-  grpcWebChecked,
-  interactiveChecked,
   onInteractiveChange,
   tlsSelected,
   onTLSSelected,
   onClickExport,
+  viewModel,
 }: OptionsProps) {
   const [tlsModalVisible, setTlsModalVisible] = React.useState(false);
 
@@ -88,9 +84,9 @@ export function Options({
             large
             innerLabel="GRPC"
             innerLabelChecked="WEB"
-            defaultChecked={grpcWebChecked}
+            defaultChecked={viewModel.grpcWeb}
             onChange={(ev) => {
-              dispatch(setGrpcWeb((ev.target as HTMLInputElement).checked));
+              viewModel.setGrpcWeb((ev.target as HTMLInputElement).checked);
             }}
           />
         </div>
@@ -99,10 +95,10 @@ export function Options({
             large
             innerLabel="Manual"
             innerLabelChecked="Interactive"
-            defaultChecked={interactiveChecked}
+            defaultChecked={viewModel.interactive}
             onChange={(ev) => {
               const el = ev.target as HTMLInputElement;
-              dispatch(setInteractive(el.checked));
+              viewModel.setInteractive(el.checked);
               onInteractiveChange && onInteractiveChange(el.checked);
             }}
           />
