@@ -63,8 +63,6 @@ export interface EditorState {
 }
 
 interface EditorOldState {
-  inputs?: string; // @deprecated
-
   loading: boolean;
   response: EditorResponse;
   metadataOpened: boolean;
