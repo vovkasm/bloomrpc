@@ -16,7 +16,7 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import { actions, setData, setMetadataVisibilty, setProtoVisibility, setTSLCertificate } from './actions';
+import { actions, setMetadataVisibilty, setProtoVisibility, setTSLCertificate } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -63,7 +63,6 @@ export interface EditorState {
 }
 
 interface EditorOldState {
-  data: string;
   inputs?: string; // @deprecated
   tlsCertificate?: Certificate;
 
@@ -90,7 +89,6 @@ export interface EditorResponse {
 }
 
 const INITIAL_STATE: EditorOldState = {
-  data: '',
   requestStreamData: [],
   responseStreamData: [],
   loading: false,
@@ -112,9 +110,6 @@ const INITIAL_STATE: EditorOldState = {
  */
 const reducer = (state: EditorOldState, action: EditorAction): EditorOldState => {
   switch (action.type) {
-    case actions.SET_DATA:
-      return { ...state, data: action.data };
-
     case actions.SET_IS_LOADING:
       return { ...state, loading: action.isLoading };
 
@@ -164,6 +159,7 @@ export class EditorViewModel {
   metadata: string;
   grpcWeb: boolean;
   environmentName: string | undefined;
+  data: string = '';
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
@@ -194,6 +190,10 @@ export class EditorViewModel {
     this.environmentName = val;
   }
 
+  setData(val: string) {
+    this.data = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
@@ -201,6 +201,7 @@ export class EditorViewModel {
       metadata: this.metadata,
       grpcWeb: this.grpcWeb,
       environment: this.environmentName,
+      data: this.data,
     };
   }
 }
@@ -218,31 +219,27 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
       }),
   );
 
-  const [state, dispatch] = useReducer(reducer, { ...INITIAL_STATE }, undefined);
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE, undefined);
 
   useEffect(() => {
     if (protoInfo && !initialRequest) {
       try {
         const { plain } = protoInfo.service.methodsMocks[protoInfo.methodName]();
-        dispatch(setData(JSON.stringify(plain, null, 2)));
+        viewModel.setData(JSON.stringify(plain, null, 2));
       } catch (e) {
         console.error(e);
-        dispatch(
-          setData(
-            JSON.stringify(
-              {
-                error: 'Error parsing the request message, please report the problem sharing the offending protofile',
-              },
-              null,
-              2,
-            ),
+        viewModel.setData(
+          JSON.stringify(
+            { error: 'Error parsing the request message, please report the problem sharing the offending protofile' },
+            null,
+            2,
           ),
         );
       }
     }
 
     if (initialRequest) {
-      dispatch(setData(initialRequest.inputs || initialRequest.data));
+      viewModel.setData(initialRequest.inputs || initialRequest.data);
       viewModel.setMetadata(initialRequest.metadata);
       dispatch(setTSLCertificate(initialRequest.tlsCertificate));
     }
@@ -360,17 +357,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           minWidth={'10%'}
         >
           <Request
-            data={state.data}
+            data={viewModel.data}
             streamData={state.requestStreamData}
             active={active}
             onChangeData={(value) => {
-              dispatch(setData(value));
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  data: value,
-                });
+              viewModel.setData(value);
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
           />
 

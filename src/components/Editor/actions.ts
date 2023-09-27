@@ -3,7 +3,6 @@ import type { Certificate } from '../../model';
 import { EditorResponse } from './Editor';
 
 const actions = {
-  SET_DATA: 'SET_DATA',
   SET_IS_LOADING: 'SET_IS_LOADING',
   SET_RESPONSE: 'SET_RESPONSE',
   SET_CALL: 'SET_CALL',
@@ -15,10 +14,6 @@ const actions = {
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
   SET_SSL_CERTIFICATE: 'SET_SSL_CERTIFICATE',
 } as const;
-
-export function setData(data: string) {
-  return { type: actions.SET_DATA, data };
-}
 
 export function setIsLoading(isLoading: boolean) {
   return { type: actions.SET_IS_LOADING, isLoading };
