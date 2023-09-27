@@ -12,7 +12,6 @@ const actions = {
   SET_RESPONSE_STREAM_DATA: 'SET_RESPONSE_STREAM_DATA',
   ADD_RESPONSE_STREAM_DATA: 'ADD_RESPONSE_STREAM_DATA',
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
-  SET_SSL_CERTIFICATE: 'SET_SSL_CERTIFICATE',
 } as const;
 
 export function setIsLoading(isLoading: boolean) {
@@ -49,10 +48,6 @@ export function addResponseStreamData(responseData: EditorResponse) {
 
 export function setStreamCommitted(committed: boolean) {
   return { type: actions.SET_STREAM_COMMITTED, committed };
-}
-
-export function setTSLCertificate(certificate?: Certificate) {
-  return { type: actions.SET_SSL_CERTIFICATE, certificate };
 }
 
 export { actions };

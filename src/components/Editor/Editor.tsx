@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, observable } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
@@ -16,7 +16,7 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import { actions, setMetadataVisibilty, setProtoVisibility, setTSLCertificate } from './actions';
+import { actions, setMetadataVisibilty, setProtoVisibility } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -64,7 +64,6 @@ export interface EditorState {
 
 interface EditorOldState {
   inputs?: string; // @deprecated
-  tlsCertificate?: Certificate;
 
   loading: boolean;
   response: EditorResponse;
@@ -99,7 +98,6 @@ const INITIAL_STATE: EditorOldState = {
   metadataOpened: false,
   protoViewVisible: false,
   streamCommitted: false,
-  tlsCertificate: undefined,
   call: undefined,
 };
 
@@ -137,9 +135,6 @@ const reducer = (state: EditorOldState, action: EditorAction): EditorOldState =>
     case actions.SET_STREAM_COMMITTED:
       return { ...state, streamCommitted: action.committed };
 
-    case actions.SET_SSL_CERTIFICATE:
-      return { ...state, tlsCertificate: action.certificate };
-
     default:
       return state;
   }
@@ -160,6 +155,7 @@ export class EditorViewModel {
   grpcWeb: boolean;
   environmentName: string | undefined;
   data: string = '';
+  tlsCertificate?: Certificate = undefined;
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
@@ -167,7 +163,7 @@ export class EditorViewModel {
     this.metadata = init.metadata;
     this.grpcWeb = init.grpcWeb;
     this.environmentName = init.environmentName;
-    makeAutoObservable(this);
+    makeAutoObservable(this, { tlsCertificate: observable.ref });
   }
 
   setUrl(url: string) {
@@ -194,6 +190,10 @@ export class EditorViewModel {
     this.data = val;
   }
 
+  setCertificate(val: Certificate | undefined) {
+    this.tlsCertificate = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
@@ -202,6 +202,7 @@ export class EditorViewModel {
       grpcWeb: this.grpcWeb,
       environment: this.environmentName,
       data: this.data,
+      tlsCertificate: this.tlsCertificate,
     };
   }
 }
@@ -241,7 +242,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
     if (initialRequest) {
       viewModel.setData(initialRequest.inputs || initialRequest.data);
       viewModel.setMetadata(initialRequest.metadata);
-      dispatch(setTSLCertificate(initialRequest.tlsCertificate));
+      viewModel.setCertificate(initialRequest.tlsCertificate);
     }
   }, []);
 
@@ -268,7 +269,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               viewModel.setUrl(environment.url);
               viewModel.setMetadata(environment.metadata);
               viewModel.setEnvironmentName(environment.name);
-              dispatch(setTSLCertificate(environment.tlsCertificate));
+              viewModel.setCertificate(environment.tlsCertificate);
               viewModel.setInteractive(environment.interactive);
 
               onRequestChange &&
@@ -298,7 +299,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
                 url: viewModel.url,
                 interactive: viewModel.interactive,
                 metadata: viewModel.metadata,
-                tlsCertificate: state.tlsCertificate!,
+                tlsCertificate: viewModel.tlsCertificate!,
               });
 
               viewModel.setEnvironmentName(environmentName);
@@ -332,15 +333,10 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             onInteractiveChange={(checked) => {
               onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
-            tlsSelected={state.tlsCertificate}
+            tlsSelected={viewModel.tlsCertificate}
             onTLSSelected={(certificate) => {
-              dispatch(setTSLCertificate(certificate));
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  tlsCertificate: certificate,
-                });
+              viewModel.setCertificate(certificate);
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
           />
         )}
