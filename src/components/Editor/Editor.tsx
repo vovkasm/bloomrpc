@@ -16,14 +16,7 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import {
-  actions,
-  setData,
-  setEnvironment,
-  setMetadataVisibilty,
-  setProtoVisibility,
-  setTSLCertificate,
-} from './actions';
+import { actions, setData, setMetadataVisibilty, setProtoVisibility, setTSLCertificate } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -72,7 +65,6 @@ export interface EditorState {
 interface EditorOldState {
   data: string;
   inputs?: string; // @deprecated
-  environment?: string;
   tlsCertificate?: Certificate;
 
   loading: boolean;
@@ -153,9 +145,6 @@ const reducer = (state: EditorOldState, action: EditorAction): EditorOldState =>
     case actions.SET_SSL_CERTIFICATE:
       return { ...state, tlsCertificate: action.certificate };
 
-    case actions.SET_ENVIRONMENT:
-      return { ...state, environment: action.environment };
-
     default:
       return state;
   }
@@ -166,6 +155,7 @@ type EditorViewModelInit = {
   interactive: boolean;
   metadata: string;
   grpcWeb: boolean;
+  environmentName?: string;
 };
 
 export class EditorViewModel {
@@ -173,12 +163,14 @@ export class EditorViewModel {
   interactive: boolean;
   metadata: string;
   grpcWeb: boolean;
+  environmentName: string | undefined;
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
     this.interactive = init.interactive;
     this.metadata = init.metadata;
     this.grpcWeb = init.grpcWeb;
+    this.environmentName = init.environmentName;
     makeAutoObservable(this);
   }
 
@@ -198,12 +190,17 @@ export class EditorViewModel {
     this.grpcWeb = val;
   }
 
+  setEnvironmentName(val: string | undefined) {
+    this.environmentName = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
       interactive: this.interactive,
       metadata: this.metadata,
       grpcWeb: this.grpcWeb,
+      environment: this.environmentName,
     };
   }
 }
@@ -217,17 +214,11 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         interactive: initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false,
         metadata: initialRequest?.metadata || getMetadata() || '',
         grpcWeb: initialRequest?.grpcWeb ?? false,
+        environmentName: initialRequest?.environment || '',
       }),
   );
 
-  const [state, dispatch] = useReducer(
-    reducer,
-    {
-      ...INITIAL_STATE,
-      environment: initialRequest && initialRequest.environment,
-    },
-    undefined,
-  );
+  const [state, dispatch] = useReducer(reducer, { ...INITIAL_STATE }, undefined);
 
   useEffect(() => {
     if (protoInfo && !initialRequest) {
@@ -265,22 +256,21 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             protoInfo={protoInfo}
             loading={state.loading}
             url={viewModel.url}
-            defaultEnvironment={state.environment}
+            defaultEnvironment={viewModel.environmentName}
             onChangeEnvironment={(environment) => {
               if (!environment) {
-                dispatch(setEnvironment(''));
+                viewModel.setEnvironmentName(undefined);
                 onRequestChange &&
                   onRequestChange({
                     ...state,
                     ...viewModel.toJSON(),
-                    environment: '',
                   });
                 return;
               }
 
               viewModel.setUrl(environment.url);
               viewModel.setMetadata(environment.metadata);
-              dispatch(setEnvironment(environment.name));
+              viewModel.setEnvironmentName(environment.name);
               dispatch(setTSLCertificate(environment.tlsCertificate));
               viewModel.setInteractive(environment.interactive);
 
@@ -297,7 +287,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             }}
             onEnvironmentDelete={(environmentName) => {
               root.environments.delete(environmentName);
-              dispatch(setEnvironment(''));
+              viewModel.setEnvironmentName(undefined);
               onRequestChange &&
                 onRequestChange({
                   ...state,
@@ -314,7 +304,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
                 tlsCertificate: state.tlsCertificate!,
               });
 
-              dispatch(setEnvironment(environmentName));
+              viewModel.setEnvironmentName(environmentName);
               onRequestChange &&
                 onRequestChange({
                   ...state,

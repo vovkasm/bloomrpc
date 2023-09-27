@@ -1,4 +1,5 @@
 import { HotkeyConfig, Icon, useHotkeys } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
 import { GRPCEventEmitter, GRPCEventType, GRPCRequest, GRPCWebRequest, ResponseMetaInformation } from '../../behaviour';
@@ -116,12 +117,12 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   }
 };
 
-export function PlayButton({ dispatch, state, protoInfo, active }: ControlsStateProps) {
+export const PlayButton = observer<ControlsStateProps>(({ dispatch, state, protoInfo, active }) => {
   // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
   // introducing models layer
-  const run = React.useCallback(() => {
+  const run = () => {
     makeRequest({ dispatch, state, protoInfo });
-  }, [makeRequest, dispatch, state]);
+  };
 
   const hotkeys = React.useMemo<HotkeyConfig[]>(
     () => [
@@ -137,7 +138,7 @@ export function PlayButton({ dispatch, state, protoInfo, active }: ControlsState
         },
       },
     ],
-    [active, state.loading, run],
+    [],
   );
 
   useHotkeys(hotkeys);
@@ -150,7 +151,7 @@ export function PlayButton({ dispatch, state, protoInfo, active }: ControlsState
       onClick={run}
     />
   );
-}
+});
 
 const styles = {
   playIcon: {

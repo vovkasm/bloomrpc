@@ -1,4 +1,5 @@
 import { Icon, Tooltip } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
 import { ProtoInfo } from '../../behaviour';
@@ -13,7 +14,7 @@ export interface ControlsStateProps {
   active?: boolean;
 }
 
-export function Controls({ dispatch, state, protoInfo, active }: ControlsStateProps) {
+export const Controls = observer<ControlsStateProps>(({ dispatch, state, protoInfo, active }) => {
   return (
     <div>
       <PlayButton active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
@@ -51,7 +52,7 @@ export function Controls({ dispatch, state, protoInfo, active }: ControlsStatePr
       )}
     </div>
   );
-}
+});
 
 export function isControlVisible(state: EditorState) {
   return Boolean(

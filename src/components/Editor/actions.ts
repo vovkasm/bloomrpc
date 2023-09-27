@@ -14,7 +14,6 @@ const actions = {
   ADD_RESPONSE_STREAM_DATA: 'ADD_RESPONSE_STREAM_DATA',
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
   SET_SSL_CERTIFICATE: 'SET_SSL_CERTIFICATE',
-  SET_ENVIRONMENT: 'SET_ENVIRONMENT',
 } as const;
 
 export function setData(data: string) {
@@ -59,10 +58,6 @@ export function setStreamCommitted(committed: boolean) {
 
 export function setTSLCertificate(certificate?: Certificate) {
   return { type: actions.SET_SSL_CERTIFICATE, certificate };
-}
-
-export function setEnvironment(environment: string) {
-  return { type: actions.SET_ENVIRONMENT, environment };
 }
 
 export { actions };
