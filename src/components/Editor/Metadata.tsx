@@ -7,14 +7,13 @@ import AceEditor from 'react-ace';
 import { storeMetadata } from '../../storage';
 
 interface MetadataProps {
-  onClickMetadata: () => void;
   onMetadataChange: (value: string) => void;
   value: string;
 }
 
 const minHeight = 32;
 
-export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataProps) {
+export function Metadata({ onMetadataChange, value }: MetadataProps) {
   const [height, setHeight] = useState(minHeight);
   const visibile = height > minHeight;
 
@@ -50,7 +49,6 @@ export function Metadata({ onClickMetadata, onMetadataChange, value }: MetadataP
               } else {
                 setHeight(150);
               }
-              onClickMetadata();
             }}
           >
             {' '}

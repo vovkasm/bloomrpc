@@ -3,21 +3,22 @@ import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
 import { ProtoInfo } from '../../behaviour';
-import { EditorAction, EditorState } from './Editor';
+import type { EditorAction, EditorState, EditorViewModel } from './Editor';
 import { PlayButton } from './PlayButton';
 import { setRequestStreamData, setStreamCommitted } from './actions';
 
 export interface ControlsStateProps {
+  viewModel: EditorViewModel;
   dispatch: React.Dispatch<EditorAction>;
   state: EditorState;
   protoInfo?: ProtoInfo;
   active?: boolean;
 }
 
-export const Controls = observer<ControlsStateProps>(({ dispatch, state, protoInfo, active }) => {
+export const Controls = observer<ControlsStateProps>(({ viewModel, dispatch, state, protoInfo, active }) => {
   return (
     <div>
-      <PlayButton active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
+      <PlayButton viewModel={viewModel} active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
 
       {isControlVisible(state) && (
         <div style={styles.controlsContainer}>

@@ -16,7 +16,7 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import { actions, setMetadataVisibilty, setProtoVisibility } from './actions';
+import { actions, setProtoVisibility } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -54,7 +54,6 @@ export interface EditorState {
 
   loading: boolean;
   response: EditorResponse;
-  metadataOpened: boolean;
   protoViewVisible: boolean;
   requestStreamData: string[];
   responseStreamData: EditorResponse[];
@@ -63,9 +62,7 @@ export interface EditorState {
 }
 
 interface EditorOldState {
-  loading: boolean;
   response: EditorResponse;
-  metadataOpened: boolean;
   protoViewVisible: boolean;
   requestStreamData: string[];
   responseStreamData: EditorResponse[];
@@ -88,12 +85,10 @@ export interface EditorResponse {
 const INITIAL_STATE: EditorOldState = {
   requestStreamData: [],
   responseStreamData: [],
-  loading: false,
   response: {
     output: '',
     responseTime: undefined,
   },
-  metadataOpened: false,
   protoViewVisible: false,
   streamCommitted: false,
   call: undefined,
@@ -106,17 +101,11 @@ const INITIAL_STATE: EditorOldState = {
  */
 const reducer = (state: EditorOldState, action: EditorAction): EditorOldState => {
   switch (action.type) {
-    case actions.SET_IS_LOADING:
-      return { ...state, loading: action.isLoading };
-
     case actions.SET_RESPONSE:
       return { ...state, response: action.response };
 
     case actions.SET_CALL:
       return { ...state, call: action.call };
-
-    case actions.SET_METADATA_VISIBILITY:
-      return { ...state, metadataOpened: action.visible };
 
     case actions.SET_PROTO_VISIBILITY:
       return { ...state, protoViewVisible: action.visible };
@@ -155,6 +144,8 @@ export class EditorViewModel {
   data: string = '';
   tlsCertificate?: Certificate = undefined;
 
+  loading: boolean = false;
+
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
     this.interactive = init.interactive;
@@ -192,6 +183,10 @@ export class EditorViewModel {
     this.tlsCertificate = val;
   }
 
+  setLoading(val: boolean) {
+    this.loading = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
@@ -201,6 +196,7 @@ export class EditorViewModel {
       environment: this.environmentName,
       data: this.data,
       tlsCertificate: this.tlsCertificate,
+      loading: this.loading,
     };
   }
 }
@@ -250,17 +246,13 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         <div style={{ width: '60%' }}>
           <AddressBar
             protoInfo={protoInfo}
-            loading={state.loading}
+            loading={viewModel.loading}
             url={viewModel.url}
             defaultEnvironment={viewModel.environmentName}
             onChangeEnvironment={(environment) => {
               if (!environment) {
                 viewModel.setEnvironmentName(undefined);
-                onRequestChange &&
-                  onRequestChange({
-                    ...state,
-                    ...viewModel.toJSON(),
-                  });
+                onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
                 return;
               }
 
@@ -270,26 +262,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               viewModel.setCertificate(environment.tlsCertificate);
               viewModel.setInteractive(environment.interactive);
 
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  environment: environment.name,
-                  url: environment.url,
-                  metadata: environment.metadata,
-                  tlsCertificate: environment.tlsCertificate,
-                  interactive: environment.interactive,
-                });
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
             onEnvironmentDelete={(environmentName) => {
               root.environments.delete(environmentName);
               viewModel.setEnvironmentName(undefined);
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  environment: '',
-                });
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
             onEnvironmentSave={(environmentName) => {
               root.environments.updateOrCreate({
@@ -301,22 +279,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               });
 
               viewModel.setEnvironmentName(environmentName);
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  environment: environmentName,
-                });
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
             onChangeUrl={(e) => {
               viewModel.setUrl(e.target.value);
               storeUrl(e.target.value);
-              onRequestChange &&
-                onRequestChange({
-                  ...state,
-                  ...viewModel.toJSON(),
-                  url: e.target.value,
-                });
+              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
           />
         </div>
@@ -367,6 +335,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             }}
           >
             <Controls
+              viewModel={viewModel}
               active={active}
               dispatch={dispatch}
               state={{ ...state, ...viewModel.toJSON() }}
@@ -381,17 +350,9 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
       </div>
 
       <Metadata
-        onClickMetadata={() => {
-          dispatch(setMetadataVisibilty(!state.metadataOpened));
-        }}
         onMetadataChange={(value) => {
           viewModel.setMetadata(value);
-          onRequestChange &&
-            onRequestChange({
-              ...state,
-              ...viewModel.toJSON(),
-              metadata: value,
-            });
+          onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
         }}
         value={viewModel.metadata}
       />

@@ -5,18 +5,17 @@ import * as React from 'react';
 import { GRPCEventEmitter, GRPCEventType, GRPCRequest, GRPCWebRequest, ResponseMetaInformation } from '../../behaviour';
 import { toaster } from '../../toaster';
 import { castToError } from '../../utils';
-import { ControlsStateProps } from './Controls';
+import type { ControlsStateProps } from './Controls';
 import {
   addResponseStreamData,
   setCall,
-  setIsLoading,
   setRequestStreamData,
   setResponse,
   setResponseStreamData,
   setStreamCommitted,
 } from './actions';
 
-export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) => {
+export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
   if (!protoInfo) {
     return;
@@ -29,7 +28,7 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   }
 
   // Play button action:
-  dispatch(setIsLoading(true));
+  viewModel.setLoading(true);
 
   let grpcRequest: GRPCEventEmitter;
   if (state.grpcWeb) {
@@ -99,7 +98,7 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   });
 
   grpcRequest.on(GRPCEventType.END, () => {
-    dispatch(setIsLoading(false));
+    viewModel.setLoading(false);
     dispatch(setCall(undefined));
     dispatch(setStreamCommitted(false));
   });
@@ -117,11 +116,11 @@ export const makeRequest = ({ dispatch, state, protoInfo }: ControlsStateProps) 
   }
 };
 
-export const PlayButton = observer<ControlsStateProps>(({ dispatch, state, protoInfo, active }) => {
+export const PlayButton = observer<ControlsStateProps>(({ viewModel, dispatch, state, protoInfo, active }) => {
   // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
   // introducing models layer
   const run = () => {
-    makeRequest({ dispatch, state, protoInfo });
+    makeRequest({ viewModel, dispatch, state, protoInfo });
   };
 
   const hotkeys = React.useMemo<HotkeyConfig[]>(

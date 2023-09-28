@@ -1,12 +1,9 @@
 import { GRPCEventEmitter } from '../../behaviour';
-import type { Certificate } from '../../model';
-import { EditorResponse } from './Editor';
+import type { EditorResponse } from './Editor';
 
 const actions = {
-  SET_IS_LOADING: 'SET_IS_LOADING',
   SET_RESPONSE: 'SET_RESPONSE',
   SET_CALL: 'SET_CALL',
-  SET_METADATA_VISIBILITY: 'SET_METADATA_VISIBILITY',
   SET_PROTO_VISIBILITY: 'SET_PROTO_VIEW',
   SET_REQUEST_STREAM_DATA: 'SET_REQUEST_STREAM_DATA',
   SET_RESPONSE_STREAM_DATA: 'SET_RESPONSE_STREAM_DATA',
@@ -14,20 +11,12 @@ const actions = {
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
 } as const;
 
-export function setIsLoading(isLoading: boolean) {
-  return { type: actions.SET_IS_LOADING, isLoading };
-}
-
 export function setResponse(response: EditorResponse) {
   return { type: actions.SET_RESPONSE, response };
 }
 
 export function setCall(call?: GRPCEventEmitter) {
   return { type: actions.SET_CALL, call };
-}
-
-export function setMetadataVisibilty(visible: boolean) {
-  return { type: actions.SET_METADATA_VISIBILITY, visible };
 }
 
 export function setProtoVisibility(visible: boolean) {
