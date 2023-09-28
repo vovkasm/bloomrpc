@@ -16,7 +16,7 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import { actions, setProtoVisibility } from './actions';
+import { actions } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -62,7 +62,6 @@ export interface EditorState {
 }
 
 interface EditorOldState {
-  protoViewVisible: boolean;
   requestStreamData: string[];
   responseStreamData: EditorResponse[];
   streamCommitted: boolean;
@@ -84,7 +83,6 @@ export interface EditorResponse {
 const INITIAL_STATE: EditorOldState = {
   requestStreamData: [],
   responseStreamData: [],
-  protoViewVisible: false,
   streamCommitted: false,
   call: undefined,
 };
@@ -98,9 +96,6 @@ const reducer = (state: EditorOldState, action: EditorAction): EditorOldState =>
   switch (action.type) {
     case actions.SET_CALL:
       return { ...state, call: action.call };
-
-    case actions.SET_PROTO_VISIBILITY:
-      return { ...state, protoViewVisible: action.visible };
 
     case actions.SET_REQUEST_STREAM_DATA:
       return { ...state, requestStreamData: action.requestData };
@@ -136,6 +131,7 @@ export class EditorViewModel {
   data: string = '';
   tlsCertificate?: Certificate = undefined;
 
+  protoViewVisible: boolean = false;
   loading: boolean = false;
   response: EditorResponse = { output: '' };
 
@@ -176,6 +172,10 @@ export class EditorViewModel {
     this.tlsCertificate = val;
   }
 
+  setProtoViewVisible(val: boolean) {
+    this.protoViewVisible = val;
+  }
+
   setLoading(val: boolean) {
     this.loading = val;
   }
@@ -195,9 +195,11 @@ export class EditorViewModel {
       tlsCertificate: this.tlsCertificate,
       loading: this.loading,
       response: this.response,
+      protoViewVisible: this.protoViewVisible,
     };
   }
 }
+
 export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequestChange, active }) => {
   const root = useRootModel();
 
@@ -287,23 +289,21 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           />
         </div>
 
-        {protoInfo && (
+        {protoInfo ? (
           <Options
             viewModel={viewModel}
-            dispatch={dispatch}
             onClickExport={async () => {
               await exportResponseToJSONFile(protoInfo, { ...state, ...viewModel.toJSON() });
             }}
             onInteractiveChange={(checked) => {
               onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
-            tlsSelected={viewModel.tlsCertificate}
             onTLSSelected={(certificate) => {
               viewModel.setCertificate(certificate);
               onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
             }}
           />
-        )}
+        ) : null}
       </div>
 
       <div style={styles.editorContainer}>
@@ -358,8 +358,8 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
       {protoInfo && (
         <ProtoFileViewer
           protoInfo={protoInfo}
-          visible={state.protoViewVisible}
-          onClose={() => dispatch(setProtoVisibility(false))}
+          visible={viewModel.protoViewVisible}
+          onClose={() => viewModel.setProtoViewVisible(false)}
         />
       )}
     </div>

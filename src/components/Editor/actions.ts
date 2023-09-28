@@ -3,7 +3,6 @@ import type { EditorResponse } from './Editor';
 
 const actions = {
   SET_CALL: 'SET_CALL',
-  SET_PROTO_VISIBILITY: 'SET_PROTO_VIEW',
   SET_REQUEST_STREAM_DATA: 'SET_REQUEST_STREAM_DATA',
   SET_RESPONSE_STREAM_DATA: 'SET_RESPONSE_STREAM_DATA',
   ADD_RESPONSE_STREAM_DATA: 'ADD_RESPONSE_STREAM_DATA',
@@ -12,10 +11,6 @@ const actions = {
 
 export function setCall(call?: GRPCEventEmitter) {
   return { type: actions.SET_CALL, call };
-}
-
-export function setProtoVisibility(visible: boolean) {
-  return { type: actions.SET_PROTO_VISIBILITY, visible };
 }
 
 export function setRequestStreamData(requestData: string[]) {
