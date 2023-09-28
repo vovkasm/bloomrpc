@@ -1,22 +1,23 @@
 import { Drawer } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import React from 'react';
 import AceEditor from 'react-ace';
 
-import { ProtoInfo } from '../../behaviour';
+import type { ProtoInfo } from '../../behaviour';
+import type { EditorViewModel } from './Editor';
 
 interface ProtoFileViewerProps {
+  viewModel: EditorViewModel;
   protoInfo: ProtoInfo;
-  visible: boolean;
-  onClose: () => void;
 }
 
-export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewerProps) {
+export const ProtoFileViewer = observer<ProtoFileViewerProps>(({ viewModel, protoInfo }) => {
   return (
     <Drawer
       title={protoInfo.service.proto.fileName.split('/').pop()}
       position={'right'}
-      onClose={onClose}
-      isOpen={visible}
+      onClose={() => viewModel.setProtoViewVisible(false)}
+      isOpen={viewModel.protoViewVisible}
     >
       <AceEditor
         style={{ marginTop: '10px', background: '#fff' }}
@@ -47,4 +48,4 @@ export function ProtoFileViewer({ protoInfo, visible, onClose }: ProtoFileViewer
       />
     </Drawer>
   );
-}
+});

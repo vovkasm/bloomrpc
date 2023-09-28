@@ -355,13 +355,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         value={viewModel.metadata}
       />
 
-      {protoInfo && (
-        <ProtoFileViewer
-          protoInfo={protoInfo}
-          visible={viewModel.protoViewVisible}
-          onClose={() => viewModel.setProtoViewVisible(false)}
-        />
-      )}
+      {protoInfo && <ProtoFileViewer viewModel={viewModel} protoInfo={protoInfo} />}
     </div>
   );
 });
