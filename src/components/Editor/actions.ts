@@ -2,7 +2,6 @@ import { GRPCEventEmitter } from '../../behaviour';
 import type { EditorResponse } from './Editor';
 
 const actions = {
-  SET_RESPONSE: 'SET_RESPONSE',
   SET_CALL: 'SET_CALL',
   SET_PROTO_VISIBILITY: 'SET_PROTO_VIEW',
   SET_REQUEST_STREAM_DATA: 'SET_REQUEST_STREAM_DATA',
@@ -10,10 +9,6 @@ const actions = {
   ADD_RESPONSE_STREAM_DATA: 'ADD_RESPONSE_STREAM_DATA',
   SET_STREAM_COMMITTED: 'SET_STREAM_COMMITTED',
 } as const;
-
-export function setResponse(response: EditorResponse) {
-  return { type: actions.SET_RESPONSE, response };
-}
 
 export function setCall(call?: GRPCEventEmitter) {
   return { type: actions.SET_CALL, call };

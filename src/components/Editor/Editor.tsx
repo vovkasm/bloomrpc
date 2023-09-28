@@ -62,7 +62,6 @@ export interface EditorState {
 }
 
 interface EditorOldState {
-  response: EditorResponse;
   protoViewVisible: boolean;
   requestStreamData: string[];
   responseStreamData: EditorResponse[];
@@ -85,10 +84,6 @@ export interface EditorResponse {
 const INITIAL_STATE: EditorOldState = {
   requestStreamData: [],
   responseStreamData: [],
-  response: {
-    output: '',
-    responseTime: undefined,
-  },
   protoViewVisible: false,
   streamCommitted: false,
   call: undefined,
@@ -101,9 +96,6 @@ const INITIAL_STATE: EditorOldState = {
  */
 const reducer = (state: EditorOldState, action: EditorAction): EditorOldState => {
   switch (action.type) {
-    case actions.SET_RESPONSE:
-      return { ...state, response: action.response };
-
     case actions.SET_CALL:
       return { ...state, call: action.call };
 
@@ -145,6 +137,7 @@ export class EditorViewModel {
   tlsCertificate?: Certificate = undefined;
 
   loading: boolean = false;
+  response: EditorResponse = { output: '' };
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
@@ -187,6 +180,10 @@ export class EditorViewModel {
     this.loading = val;
   }
 
+  setResponse(val: EditorResponse) {
+    this.response = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
@@ -197,6 +194,7 @@ export class EditorViewModel {
       data: this.data,
       tlsCertificate: this.tlsCertificate,
       loading: this.loading,
+      response: this.response,
     };
   }
 }
@@ -345,7 +343,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         </Resizable>
 
         <div style={{ ...styles.responseContainer }}>
-          <Response streamResponse={state.responseStreamData} response={state.response} />
+          <Response streamResponse={state.responseStreamData} response={viewModel.response} />
         </div>
       </div>
 

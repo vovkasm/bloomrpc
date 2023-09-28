@@ -10,7 +10,6 @@ import {
   addResponseStreamData,
   setCall,
   setRequestStreamData,
-  setResponse,
   setResponseStreamData,
   setStreamCommitted,
 } from './actions';
@@ -65,18 +64,10 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
   dispatch(setResponseStreamData([]));
 
   grpcRequest.on(GRPCEventType.ERROR, (e: Error, metaInfo: ResponseMetaInformation) => {
-    dispatch(
-      setResponse({
-        responseTime: metaInfo.responseTime,
-        output: JSON.stringify(
-          {
-            error: e.message,
-          },
-          null,
-          2,
-        ),
-      }),
-    );
+    viewModel.setResponse({
+      responseTime: metaInfo.responseTime,
+      output: JSON.stringify({ error: e.message }, null, 2),
+    });
   });
 
   grpcRequest.on(GRPCEventType.DATA, (data: object, metaInfo: ResponseMetaInformation) => {
@@ -88,12 +79,10 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
         }),
       );
     } else {
-      dispatch(
-        setResponse({
-          responseTime: metaInfo.responseTime,
-          output: JSON.stringify(data, null, 2),
-        }),
-      );
+      viewModel.setResponse({
+        responseTime: metaInfo.responseTime,
+        output: JSON.stringify(data, null, 2),
+      });
     }
   });
 
