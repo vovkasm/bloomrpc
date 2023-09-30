@@ -2,7 +2,7 @@ import { makeAutoObservable, observable } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
-import { useEffect, useReducer } from 'react';
+import { useEffect } from 'react';
 
 import { GRPCEventEmitter, ProtoInfo } from '../../behaviour';
 import { exportResponseToJSONFile } from '../../behaviour/response';
@@ -16,7 +16,6 @@ import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
-import { actions } from './actions';
 
 export interface EditorAction {
   [key: string]: any;
@@ -61,13 +60,6 @@ export interface EditorState {
   call?: GRPCEventEmitter;
 }
 
-interface EditorOldState {
-  requestStreamData: string[];
-  responseStreamData: EditorResponse[];
-  streamCommitted: boolean;
-  call?: GRPCEventEmitter;
-}
-
 export interface EditorProps {
   protoInfo?: ProtoInfo;
   onRequestChange?: (editorRequest: EditorRequest & EditorState) => void;
@@ -79,40 +71,6 @@ export interface EditorResponse {
   output: string;
   responseTime?: number;
 }
-
-const INITIAL_STATE: EditorOldState = {
-  requestStreamData: [],
-  responseStreamData: [],
-  streamCommitted: false,
-  call: undefined,
-};
-
-/**
- * Reducer
- * @param state
- * @param action
- */
-const reducer = (state: EditorOldState, action: EditorAction): EditorOldState => {
-  switch (action.type) {
-    case actions.SET_CALL:
-      return { ...state, call: action.call };
-
-    case actions.SET_REQUEST_STREAM_DATA:
-      return { ...state, requestStreamData: action.requestData };
-
-    case actions.SET_RESPONSE_STREAM_DATA:
-      return { ...state, responseStreamData: action.responseData };
-
-    case actions.ADD_RESPONSE_STREAM_DATA:
-      return { ...state, responseStreamData: [...state.responseStreamData, action.responseData] };
-
-    case actions.SET_STREAM_COMMITTED:
-      return { ...state, streamCommitted: action.committed };
-
-    default:
-      return state;
-  }
-};
 
 type EditorViewModelInit = {
   url: string;
@@ -134,6 +92,10 @@ export class EditorViewModel {
   protoViewVisible: boolean = false;
   loading: boolean = false;
   response: EditorResponse = { output: '' };
+  requestStreamData: string[] = [];
+  responseStreamData: EditorResponse[] = [];
+  call?: GRPCEventEmitter;
+  streamCommitted: boolean = false;
 
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
@@ -141,7 +103,11 @@ export class EditorViewModel {
     this.metadata = init.metadata;
     this.grpcWeb = init.grpcWeb;
     this.environmentName = init.environmentName;
-    makeAutoObservable(this, { tlsCertificate: observable.ref });
+    makeAutoObservable(this, {
+      tlsCertificate: observable.ref,
+      requestStreamData: observable.ref,
+      call: observable.ref,
+    });
   }
 
   setUrl(url: string) {
@@ -184,6 +150,26 @@ export class EditorViewModel {
     this.response = val;
   }
 
+  setRequestStreamData(data: string[]) {
+    this.requestStreamData = data;
+  }
+
+  clearResponseStreamData() {
+    this.responseStreamData = [];
+  }
+
+  addResponseStreamData(val: EditorResponse) {
+    this.responseStreamData.push(val);
+  }
+
+  setCall(call: GRPCEventEmitter | undefined) {
+    this.call = call;
+  }
+
+  setStreamCommited(val: boolean) {
+    this.streamCommitted = val;
+  }
+
   toJSON() {
     return {
       url: this.url,
@@ -196,6 +182,10 @@ export class EditorViewModel {
       loading: this.loading,
       response: this.response,
       protoViewVisible: this.protoViewVisible,
+      requestStreamData: this.requestStreamData,
+      responseStreamData: this.responseStreamData,
+      call: this.call,
+      streamCommitted: this.streamCommitted,
     };
   }
 }
@@ -213,8 +203,6 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         environmentName: initialRequest?.environment || '',
       }),
   );
-
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE, undefined);
 
   useEffect(() => {
     if (protoInfo && !initialRequest) {
@@ -252,7 +240,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             onChangeEnvironment={(environment) => {
               if (!environment) {
                 viewModel.setEnvironmentName(undefined);
-                onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+                onRequestChange && onRequestChange(viewModel.toJSON());
                 return;
               }
 
@@ -262,12 +250,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               viewModel.setCertificate(environment.tlsCertificate);
               viewModel.setInteractive(environment.interactive);
 
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
             onEnvironmentDelete={(environmentName) => {
               root.environments.delete(environmentName);
               viewModel.setEnvironmentName(undefined);
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
             onEnvironmentSave={(environmentName) => {
               root.environments.updateOrCreate({
@@ -279,12 +267,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               });
 
               viewModel.setEnvironmentName(environmentName);
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
             onChangeUrl={(e) => {
               viewModel.setUrl(e.target.value);
               storeUrl(e.target.value);
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
           />
         </div>
@@ -293,14 +281,14 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           <Options
             viewModel={viewModel}
             onClickExport={async () => {
-              await exportResponseToJSONFile(protoInfo, { ...state, ...viewModel.toJSON() });
+              await exportResponseToJSONFile(protoInfo, viewModel.toJSON());
             }}
             onInteractiveChange={(checked) => {
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
             onTLSSelected={(certificate) => {
               viewModel.setCertificate(certificate);
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
           />
         ) : null}
@@ -318,39 +306,33 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
         >
           <Request
             data={viewModel.data}
-            streamData={state.requestStreamData}
+            streamData={viewModel.requestStreamData}
             active={active}
             onChangeData={(value) => {
               viewModel.setData(value);
-              onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+              onRequestChange && onRequestChange(viewModel.toJSON());
             }}
           />
 
           <div
             style={{
               ...styles.playIconContainer,
-              ...(isControlVisible({ ...state, ...viewModel.toJSON() }) ? styles.streamControlsContainer : {}),
+              ...(isControlVisible(viewModel.toJSON()) ? styles.streamControlsContainer : {}),
             }}
           >
-            <Controls
-              viewModel={viewModel}
-              active={active}
-              dispatch={dispatch}
-              state={{ ...state, ...viewModel.toJSON() }}
-              protoInfo={protoInfo}
-            />
+            <Controls viewModel={viewModel} active={active} state={viewModel.toJSON()} protoInfo={protoInfo} />
           </div>
         </Resizable>
 
         <div style={{ ...styles.responseContainer }}>
-          <Response streamResponse={state.responseStreamData} response={viewModel.response} />
+          <Response viewModel={viewModel} />
         </div>
       </div>
 
       <Metadata
         onMetadataChange={(value) => {
           viewModel.setMetadata(value);
-          onRequestChange && onRequestChange({ ...state, ...viewModel.toJSON() });
+          onRequestChange && onRequestChange(viewModel.toJSON());
         }}
         value={viewModel.metadata}
       />

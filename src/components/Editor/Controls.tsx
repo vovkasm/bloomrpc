@@ -5,20 +5,18 @@ import * as React from 'react';
 import { ProtoInfo } from '../../behaviour';
 import type { EditorAction, EditorState, EditorViewModel } from './Editor';
 import { PlayButton } from './PlayButton';
-import { setRequestStreamData, setStreamCommitted } from './actions';
 
 export interface ControlsStateProps {
   viewModel: EditorViewModel;
-  dispatch: React.Dispatch<EditorAction>;
   state: EditorState;
   protoInfo?: ProtoInfo;
   active?: boolean;
 }
 
-export const Controls = observer<ControlsStateProps>(({ viewModel, dispatch, state, protoInfo, active }) => {
+export const Controls = observer<ControlsStateProps>(({ viewModel, state, protoInfo, active }) => {
   return (
     <div>
-      <PlayButton viewModel={viewModel} active={active} dispatch={dispatch} state={state} protoInfo={protoInfo} />
+      <PlayButton viewModel={viewModel} active={active} state={state} protoInfo={protoInfo} />
 
       {isControlVisible(state) && (
         <div style={styles.controlsContainer}>
@@ -27,7 +25,7 @@ export const Controls = observer<ControlsStateProps>(({ viewModel, dispatch, sta
               style={styles.pushData}
               onClick={() => {
                 if (state.call) {
-                  dispatch(setRequestStreamData([...state.requestStreamData, state.data]));
+                  viewModel.setRequestStreamData([...state.requestStreamData, state.data]);
                   state.call.write(state.data);
                 }
               }}
@@ -42,7 +40,7 @@ export const Controls = observer<ControlsStateProps>(({ viewModel, dispatch, sta
               onClick={() => {
                 if (state.call) {
                   state.call.commitStream();
-                  dispatch(setStreamCommitted(true));
+                  viewModel.setStreamCommited(true);
                 }
               }}
             >

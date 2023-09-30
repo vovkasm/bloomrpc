@@ -2,28 +2,27 @@ import { Tab, Tabs } from '@blueprintjs/core';
 import * as React from 'react';
 
 import bluePng from '../../../resources/blue/128x128.png';
-import { EditorResponse } from './Editor';
+import type { EditorViewModel } from './Editor';
 import { Viewer } from './Viewer';
 
 interface ResponseProps {
-  streamResponse: EditorResponse[];
-  response: EditorResponse;
+  viewModel: EditorViewModel;
 }
 
-export function Response({ response, streamResponse }: ResponseProps) {
+export function Response({ viewModel }: ResponseProps) {
   const defaultKey = `responseTab`;
   return (
     <>
       <Tabs id="response-tabs" defaultSelectedTabId={defaultKey} className="bl-editor-tabs">
-        {streamResponse.length === 0 && (
+        {viewModel.responseStreamData.length === 0 && (
           <Tab
             title={'Response'}
             id={defaultKey}
             key={defaultKey}
             panel={
               <Viewer
-                output={response.output}
-                responseTime={response.responseTime}
+                output={viewModel.response.output}
+                responseTime={viewModel.response.responseTime}
                 emptyContent={
                   <div style={{ position: 'relative', height: '325px' }}>
                     <div style={styles.introContainer}>
@@ -37,7 +36,7 @@ export function Response({ response, streamResponse }: ResponseProps) {
             panelClassName="bl-editor-tab-panel"
           />
         )}
-        {streamResponse.map((data, key) => (
+        {viewModel.responseStreamData.map((data, key) => (
           <Tab
             title={`Stream ${key + 1}`}
             id={`response-${key}`}

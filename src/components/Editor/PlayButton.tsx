@@ -6,15 +6,8 @@ import { GRPCEventEmitter, GRPCEventType, GRPCRequest, GRPCWebRequest, ResponseM
 import { toaster } from '../../toaster';
 import { castToError } from '../../utils';
 import type { ControlsStateProps } from './Controls';
-import {
-  addResponseStreamData,
-  setCall,
-  setRequestStreamData,
-  setResponseStreamData,
-  setStreamCommitted,
-} from './actions';
 
-export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsStateProps) => {
+export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
   if (!protoInfo) {
     return;
@@ -50,18 +43,13 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
     });
   }
 
-  dispatch(setCall(grpcRequest));
+  viewModel.setCall(grpcRequest);
 
   // Streaming cleanup
   if (grpcRequest.protoInfo.isClientStreaming()) {
-    if (state.interactive) {
-      dispatch(setRequestStreamData([state.data]));
-    } else {
-      dispatch(setRequestStreamData([]));
-    }
+    viewModel.setRequestStreamData(state.interactive ? [state.data] : []);
   }
-
-  dispatch(setResponseStreamData([]));
+  viewModel.clearResponseStreamData();
 
   grpcRequest.on(GRPCEventType.ERROR, (e: Error, metaInfo: ResponseMetaInformation) => {
     viewModel.setResponse({
@@ -72,12 +60,10 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
 
   grpcRequest.on(GRPCEventType.DATA, (data: object, metaInfo: ResponseMetaInformation) => {
     if (metaInfo.stream && state.interactive) {
-      dispatch(
-        addResponseStreamData({
-          output: JSON.stringify(data, null, 2),
-          responseTime: metaInfo.responseTime,
-        }),
-      );
+      viewModel.addResponseStreamData({
+        output: JSON.stringify(data, null, 2),
+        responseTime: metaInfo.responseTime,
+      });
     } else {
       viewModel.setResponse({
         responseTime: metaInfo.responseTime,
@@ -88,8 +74,8 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
 
   grpcRequest.on(GRPCEventType.END, () => {
     viewModel.setLoading(false);
-    dispatch(setCall(undefined));
-    dispatch(setStreamCommitted(false));
+    viewModel.setCall(undefined);
+    viewModel.setStreamCommited(false);
   });
 
   try {
@@ -105,11 +91,11 @@ export const makeRequest = ({ viewModel, dispatch, state, protoInfo }: ControlsS
   }
 };
 
-export const PlayButton = observer<ControlsStateProps>(({ viewModel, dispatch, state, protoInfo, active }) => {
+export const PlayButton = observer<ControlsStateProps>(({ viewModel, state, protoInfo, active }) => {
   // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
   // introducing models layer
   const run = () => {
-    makeRequest({ viewModel, dispatch, state, protoInfo });
+    makeRequest({ viewModel, state, protoInfo });
   };
 
   const hotkeys = React.useMemo<HotkeyConfig[]>(
