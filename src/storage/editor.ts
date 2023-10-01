@@ -1,10 +1,10 @@
 // @ts-ignore
 import Store from 'electron-store';
 
-import { ProtoFile } from '../behaviour';
-import { EditorTabs } from '../components/BloomRPC';
-import { EditorRequest } from '../components/Editor';
-import { EditorTabRequest } from '../components/TabList';
+import type { ProtoFile } from '../behaviour';
+import type { EditorTabs } from '../components/BloomRPC';
+import type { EditorRequest } from '../components/Editor';
+import type { EditorTabRequest } from '../components/TabList';
 
 type EditorStorage = {
   url: string;
@@ -111,7 +111,6 @@ export function storeRequestInfo({
   id,
   url,
   data,
-  inputs,
   metadata,
   interactive,
   tlsCertificate,
@@ -121,7 +120,7 @@ export function storeRequestInfo({
   const request = {
     id,
     url,
-    data: inputs || data,
+    data,
     metadata,
     interactive,
     tlsCertificate,

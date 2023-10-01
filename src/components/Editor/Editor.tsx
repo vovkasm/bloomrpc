@@ -17,11 +17,6 @@ import { ProtoFileViewer } from './ProtoFileViewer';
 import { Request } from './Request';
 import { Response } from './Response';
 
-export interface EditorAction {
-  [key: string]: any;
-  type: string;
-}
-
 export interface EditorEnvironment {
   name: string;
   url: string;
@@ -33,36 +28,16 @@ export interface EditorEnvironment {
 export interface EditorRequest {
   url: string;
   data: string;
-  inputs?: string; // @deprecated
   metadata: string;
   interactive: boolean;
   environment?: string;
   grpcWeb: boolean;
   tlsCertificate?: Certificate;
-}
-
-export interface EditorState {
-  url: string;
-  data: string;
-  inputs?: string; // @deprecated
-  metadata: string;
-  interactive: boolean;
-  environment?: string;
-  grpcWeb: boolean;
-  tlsCertificate?: Certificate;
-
-  loading: boolean;
-  response: EditorResponse;
-  protoViewVisible: boolean;
-  requestStreamData: string[];
-  responseStreamData: EditorResponse[];
-  streamCommitted: boolean;
-  call?: GRPCEventEmitter;
 }
 
 export interface EditorProps {
   protoInfo?: ProtoInfo;
-  onRequestChange?: (editorRequest: EditorRequest & EditorState) => void;
+  onRequestChange?: (editorRequest: EditorRequest) => void;
   initialRequest?: EditorRequest;
   active?: boolean;
 }
@@ -180,7 +155,7 @@ export class EditorViewModel {
     this.streamCommitted = val;
   }
 
-  toJSON() {
+  toPlainRequest(): EditorRequest {
     return {
       url: this.url,
       interactive: this.interactive,
@@ -189,13 +164,6 @@ export class EditorViewModel {
       environment: this.environmentName,
       data: this.data,
       tlsCertificate: this.tlsCertificate,
-      loading: this.loading,
-      response: this.response,
-      protoViewVisible: this.protoViewVisible,
-      requestStreamData: this.requestStreamData,
-      responseStreamData: this.responseStreamData,
-      call: this.call,
-      streamCommitted: this.streamCommitted,
     };
   }
 }
@@ -232,7 +200,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
     }
 
     if (initialRequest) {
-      viewModel.setData(initialRequest.inputs || initialRequest.data);
+      viewModel.setData(initialRequest.data);
       viewModel.setMetadata(initialRequest.metadata);
       viewModel.setCertificate(initialRequest.tlsCertificate);
     }
@@ -250,7 +218,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             onChangeEnvironment={(environment) => {
               if (!environment) {
                 viewModel.setEnvironmentName(undefined);
-                onRequestChange && onRequestChange(viewModel.toJSON());
+                onRequestChange && onRequestChange(viewModel.toPlainRequest());
                 return;
               }
 
@@ -260,12 +228,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               viewModel.setCertificate(environment.tlsCertificate);
               viewModel.setInteractive(environment.interactive);
 
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
             onEnvironmentDelete={(environmentName) => {
               root.environments.delete(environmentName);
               viewModel.setEnvironmentName(undefined);
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
             onEnvironmentSave={(environmentName) => {
               root.environments.updateOrCreate({
@@ -277,12 +245,12 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               });
 
               viewModel.setEnvironmentName(environmentName);
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
             onChangeUrl={(e) => {
               viewModel.setUrl(e.target.value);
               storeUrl(e.target.value);
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
           />
         </div>
@@ -294,11 +262,11 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
               await exportResponseToJSONFile(protoInfo, viewModel);
             }}
             onInteractiveChange={(checked) => {
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
             onTLSSelected={(certificate) => {
               viewModel.setCertificate(certificate);
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
           />
         ) : null}
@@ -320,7 +288,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             active={active}
             onChangeData={(value) => {
               viewModel.setData(value);
-              onRequestChange && onRequestChange(viewModel.toJSON());
+              onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
           />
 
@@ -342,7 +310,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
       <Metadata
         onMetadataChange={(value) => {
           viewModel.setMetadata(value);
-          onRequestChange && onRequestChange(viewModel.toJSON());
+          onRequestChange && onRequestChange(viewModel.toPlainRequest());
         }}
         value={viewModel.metadata}
       />
