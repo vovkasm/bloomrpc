@@ -26,14 +26,23 @@ export class Environments {
   }
 
   updateOrCreate(data: EditorEnvironment) {
-    const environment: Partial<EditorEnvironment> = this._environments.find((env) => env.name === data.name) || {
-      name: data.name,
-    };
-    environment.interactive = data.interactive;
-    environment.metadata = data.metadata;
-    environment.url = data.url;
-    // TODO(vovkasm): this should be something different
-    environment.tlsCertificate = { ...environment.tlsCertificate, ...data.tlsCertificate };
+    let environment: EditorEnvironment | undefined = this._environments.find((env) => env.name === data.name);
+    if (environment) {
+      environment.interactive = data.interactive;
+      environment.metadata = data.metadata;
+      environment.url = data.url;
+      // TODO(vovkasm): this should be something different
+      environment.tlsCertificate = { ...environment.tlsCertificate, ...data.tlsCertificate };
+    } else {
+      environment = {
+        name: data.name,
+        interactive: data.interactive,
+        metadata: data.metadata,
+        url: data.url,
+        tlsCertificate: data.tlsCertificate,
+      };
+      this._environments.push(environment);
+    }
     this._save();
   }
 
