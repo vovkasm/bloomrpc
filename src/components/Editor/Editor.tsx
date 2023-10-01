@@ -10,7 +10,7 @@ import type { Certificate } from '../../model';
 import { useRootModel } from '../../model-provider';
 import { getMetadata, getUrl, storeUrl } from '../../storage';
 import { AddressBar } from './AddressBar';
-import { Controls, isControlVisible } from './Controls';
+import { Controls } from './Controls';
 import { Metadata } from './Metadata';
 import { Options } from './Options';
 import { ProtoFileViewer } from './ProtoFileViewer';
@@ -97,6 +97,12 @@ export class EditorViewModel {
   call?: GRPCEventEmitter;
   streamCommitted: boolean = false;
 
+  get isControlVisible(): boolean {
+    return Boolean(
+      this.interactive && this.loading && this.call && this.call.protoInfo.isClientStreaming() && !this.streamCommitted,
+    );
+  }
+
   constructor(init: EditorViewModelInit) {
     this.url = init.url;
     this.interactive = init.interactive;
@@ -152,6 +158,10 @@ export class EditorViewModel {
 
   setRequestStreamData(data: string[]) {
     this.requestStreamData = data;
+  }
+
+  addRequestStreamData(data: string) {
+    this.requestStreamData.push(data);
   }
 
   clearResponseStreamData() {
@@ -281,7 +291,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           <Options
             viewModel={viewModel}
             onClickExport={async () => {
-              await exportResponseToJSONFile(protoInfo, viewModel.toJSON());
+              await exportResponseToJSONFile(protoInfo, viewModel);
             }}
             onInteractiveChange={(checked) => {
               onRequestChange && onRequestChange(viewModel.toJSON());
@@ -317,10 +327,10 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
           <div
             style={{
               ...styles.playIconContainer,
-              ...(isControlVisible(viewModel.toJSON()) ? styles.streamControlsContainer : {}),
+              ...(viewModel.isControlVisible ? styles.streamControlsContainer : {}),
             }}
           >
-            <Controls viewModel={viewModel} active={active} state={viewModel.toJSON()} protoInfo={protoInfo} />
+            <Controls viewModel={viewModel} active={active} protoInfo={protoInfo} />
           </div>
         </Resizable>
 

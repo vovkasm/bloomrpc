@@ -1,4 +1,5 @@
 import { Tab, Tabs } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
 import bluePng from '../../../resources/blue/128x128.png';
@@ -9,7 +10,7 @@ interface ResponseProps {
   viewModel: EditorViewModel;
 }
 
-export function Response({ viewModel }: ResponseProps) {
+export const Response = observer<ResponseProps>(({ viewModel }) => {
   const defaultKey = `responseTab`;
   return (
     <>
@@ -48,7 +49,7 @@ export function Response({ viewModel }: ResponseProps) {
       </Tabs>
     </>
   );
-}
+});
 
 const styles = {
   introContainer: {

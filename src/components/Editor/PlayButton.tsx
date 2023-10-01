@@ -7,15 +7,15 @@ import { toaster } from '../../toaster';
 import { castToError } from '../../utils';
 import type { ControlsStateProps } from './Controls';
 
-export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps) => {
+export const makeRequest = ({ viewModel, protoInfo }: ControlsStateProps) => {
   // Do nothing if not set
   if (!protoInfo) {
     return;
   }
 
   // Cancel the call if ongoing.
-  if (state.loading && state.call) {
-    state.call.cancel();
+  if (viewModel.loading && viewModel.call) {
+    viewModel.call.cancel();
     return;
   }
 
@@ -23,23 +23,23 @@ export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps)
   viewModel.setLoading(true);
 
   let grpcRequest: GRPCEventEmitter;
-  if (state.grpcWeb) {
+  if (viewModel.grpcWeb) {
     grpcRequest = new GRPCWebRequest({
-      url: state.url,
-      inputs: state.data,
-      metadata: state.metadata,
+      url: viewModel.url,
+      inputs: viewModel.data,
+      metadata: viewModel.metadata,
       protoInfo,
-      interactive: state.interactive,
-      tlsCertificate: state.tlsCertificate,
+      interactive: viewModel.interactive,
+      tlsCertificate: viewModel.tlsCertificate,
     });
   } else {
     grpcRequest = new GRPCRequest({
-      url: state.url,
-      inputs: state.data,
-      metadata: state.metadata,
+      url: viewModel.url,
+      inputs: viewModel.data,
+      metadata: viewModel.metadata,
       protoInfo,
-      interactive: state.interactive,
-      tlsCertificate: state.tlsCertificate,
+      interactive: viewModel.interactive,
+      tlsCertificate: viewModel.tlsCertificate,
     });
   }
 
@@ -47,7 +47,7 @@ export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps)
 
   // Streaming cleanup
   if (grpcRequest.protoInfo.isClientStreaming()) {
-    viewModel.setRequestStreamData(state.interactive ? [state.data] : []);
+    viewModel.setRequestStreamData(viewModel.interactive ? [viewModel.data] : []);
   }
   viewModel.clearResponseStreamData();
 
@@ -59,7 +59,7 @@ export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps)
   });
 
   grpcRequest.on(GRPCEventType.DATA, (data: object, metaInfo: ResponseMetaInformation) => {
-    if (metaInfo.stream && state.interactive) {
+    if (metaInfo.stream && viewModel.interactive) {
       viewModel.addResponseStreamData({
         output: JSON.stringify(data, null, 2),
         responseTime: metaInfo.responseTime,
@@ -91,11 +91,11 @@ export const makeRequest = ({ viewModel, state, protoInfo }: ControlsStateProps)
   }
 };
 
-export const PlayButton = observer<ControlsStateProps>(({ viewModel, state, protoInfo, active }) => {
+export const PlayButton = observer<ControlsStateProps>(({ viewModel, protoInfo, active }) => {
   // TODO(vovkasm): protoInfo created on each render of TabList, so do not add to  deps of useCallback, this will be fixed after
   // introducing models layer
   const run = () => {
-    makeRequest({ viewModel, state, protoInfo });
+    makeRequest({ viewModel, protoInfo });
   };
 
   const hotkeys = React.useMemo<HotkeyConfig[]>(
@@ -106,7 +106,7 @@ export const PlayButton = observer<ControlsStateProps>(({ viewModel, state, prot
         allowInInput: true,
         global: true,
         onKeyDown: () => {
-          if (!active || state.loading) return;
+          if (!active || viewModel.loading) return;
           run();
           return false;
         },
@@ -119,9 +119,9 @@ export const PlayButton = observer<ControlsStateProps>(({ viewModel, state, prot
 
   return (
     <Icon
-      icon={state.loading ? 'pause' : 'play'}
+      icon={viewModel.loading ? 'pause' : 'play'}
       size={48}
-      style={{ ...styles.playIcon, ...(state.loading ? { color: '#ea5d5d' } : {}) }}
+      style={{ ...styles.playIcon, ...(viewModel.loading ? { color: '#ea5d5d' } : {}) }}
       onClick={run}
     />
   );

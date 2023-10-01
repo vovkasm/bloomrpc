@@ -2,10 +2,10 @@ import { ipcRenderer } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { EditorState } from '../components/Editor';
-import { ProtoInfo } from './protoInfo';
+import type { EditorViewModel } from '../components/Editor';
+import type { ProtoInfo } from './protoInfo';
 
-export async function exportResponseToJSONFile(protoInfo: ProtoInfo, editorState: EditorState): Promise<void> {
+export async function exportResponseToJSONFile(protoInfo: ProtoInfo, viewModel: EditorViewModel): Promise<void> {
   const filePaths = (await ipcRenderer.invoke('open-directory')) as string[];
   if (!filePaths || filePaths.length === 0) return;
 
@@ -15,10 +15,10 @@ export async function exportResponseToJSONFile(protoInfo: ProtoInfo, editorState
 
   const exportPath = path.join(basePath, fileName);
 
-  const responseData = editorState.response.output
-    ? editorState.response.output
+  const responseData = viewModel.response.output
+    ? viewModel.response.output
     : JSON.stringify(
-        editorState.responseStreamData.map((steam) => JSON.parse(steam.output)),
+        viewModel.responseStreamData.map((steam) => JSON.parse(steam.output)),
         null,
         2,
       );

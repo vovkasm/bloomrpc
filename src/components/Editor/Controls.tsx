@@ -2,31 +2,30 @@ import { Icon, Tooltip } from '@blueprintjs/core';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
-import { ProtoInfo } from '../../behaviour';
-import type { EditorAction, EditorState, EditorViewModel } from './Editor';
+import type { ProtoInfo } from '../../behaviour';
+import type { EditorViewModel } from './Editor';
 import { PlayButton } from './PlayButton';
 
 export interface ControlsStateProps {
   viewModel: EditorViewModel;
-  state: EditorState;
   protoInfo?: ProtoInfo;
   active?: boolean;
 }
 
-export const Controls = observer<ControlsStateProps>(({ viewModel, state, protoInfo, active }) => {
+export const Controls = observer<ControlsStateProps>(({ viewModel, protoInfo, active }) => {
   return (
     <div>
-      <PlayButton viewModel={viewModel} active={active} state={state} protoInfo={protoInfo} />
+      <PlayButton viewModel={viewModel} active={active} protoInfo={protoInfo} />
 
-      {isControlVisible(state) && (
+      {viewModel.isControlVisible && (
         <div style={styles.controlsContainer}>
           <Tooltip placement="top-start" content="Push Data">
             <div
               style={styles.pushData}
               onClick={() => {
-                if (state.call) {
-                  viewModel.setRequestStreamData([...state.requestStreamData, state.data]);
-                  state.call.write(state.data);
+                if (viewModel.call) {
+                  viewModel.addRequestStreamData(viewModel.data);
+                  viewModel.call.write(viewModel.data);
                 }
               }}
             >
@@ -38,8 +37,8 @@ export const Controls = observer<ControlsStateProps>(({ viewModel, state, protoI
             <div
               style={styles.commit}
               onClick={() => {
-                if (state.call) {
-                  state.call.commitStream();
+                if (viewModel.call) {
+                  viewModel.call.commitStream();
                   viewModel.setStreamCommited(true);
                 }
               }}
@@ -52,16 +51,6 @@ export const Controls = observer<ControlsStateProps>(({ viewModel, state, protoI
     </div>
   );
 });
-
-export function isControlVisible(state: EditorState) {
-  return Boolean(
-    state.interactive &&
-      state.loading &&
-      state.call &&
-      state.call.protoInfo.isClientStreaming() &&
-      !state.streamCommitted,
-  );
-}
 
 const styles = {
   controlsContainer: {
