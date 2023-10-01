@@ -47,20 +47,12 @@ export interface EditorResponse {
   responseTime?: number;
 }
 
-type EditorViewModelInit = {
-  url: string;
-  interactive: boolean;
-  metadata: string;
-  grpcWeb: boolean;
-  environmentName?: string;
-};
-
 export class EditorViewModel {
   url: string;
   interactive: boolean;
   metadata: string;
-  grpcWeb: boolean;
-  environmentName: string | undefined;
+  grpcWeb: boolean = false;
+  environmentName: string | undefined = undefined;
   data: string = '';
   tlsCertificate?: Certificate = undefined;
 
@@ -78,12 +70,33 @@ export class EditorViewModel {
     );
   }
 
-  constructor(init: EditorViewModelInit) {
-    this.url = init.url;
-    this.interactive = init.interactive;
-    this.metadata = init.metadata;
-    this.grpcWeb = init.grpcWeb;
-    this.environmentName = init.environmentName;
+  constructor(initialRequest: EditorRequest | undefined, protoInfo: ProtoInfo | undefined) {
+    this.url = initialRequest?.url || getUrl() || '0.0.0.0:3009';
+    this.interactive = initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false;
+    this.metadata = initialRequest?.metadata || getMetadata() || '';
+    this.grpcWeb = initialRequest?.grpcWeb ?? false;
+    this.environmentName = initialRequest?.environment;
+
+    if (protoInfo && !initialRequest) {
+      try {
+        const { plain } = protoInfo.service.methodsMocks[protoInfo.methodName]();
+        this.data = JSON.stringify(plain, null, 2);
+      } catch (e) {
+        console.error(e);
+        this.data = JSON.stringify(
+          { error: 'Error parsing the request message, please report the problem sharing the offending protofile' },
+          null,
+          2,
+        );
+      }
+    }
+
+    if (initialRequest) {
+      this.data = initialRequest.data;
+      this.metadata = initialRequest.metadata;
+      this.tlsCertificate = initialRequest.tlsCertificate;
+    }
+
     makeAutoObservable(this, {
       tlsCertificate: observable.ref,
       requestStreamData: observable.ref,
@@ -171,40 +184,7 @@ export class EditorViewModel {
 export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequestChange, active }) => {
   const root = useRootModel();
 
-  const viewModel = useLocalObservable(
-    () =>
-      new EditorViewModel({
-        url: initialRequest?.url || getUrl() || '0.0.0.0:3009',
-        interactive: initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false,
-        metadata: initialRequest?.metadata || getMetadata() || '',
-        grpcWeb: initialRequest?.grpcWeb ?? false,
-        environmentName: initialRequest?.environment || '',
-      }),
-  );
-
-  useEffect(() => {
-    if (protoInfo && !initialRequest) {
-      try {
-        const { plain } = protoInfo.service.methodsMocks[protoInfo.methodName]();
-        viewModel.setData(JSON.stringify(plain, null, 2));
-      } catch (e) {
-        console.error(e);
-        viewModel.setData(
-          JSON.stringify(
-            { error: 'Error parsing the request message, please report the problem sharing the offending protofile' },
-            null,
-            2,
-          ),
-        );
-      }
-    }
-
-    if (initialRequest) {
-      viewModel.setData(initialRequest.data);
-      viewModel.setMetadata(initialRequest.metadata);
-      viewModel.setCertificate(initialRequest.tlsCertificate);
-    }
-  }, []);
+  const viewModel = useLocalObservable(() => new EditorViewModel(initialRequest, protoInfo));
 
   return (
     <div style={styles.tabContainer}>
