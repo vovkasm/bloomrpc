@@ -42,8 +42,10 @@ function main() {
   const server = new grpc.Server();
 
   server.addService(getServiceDefinition(pkgDef, 'sample.KeyValueStore'), implementation);
-  server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () => {
+  const port = '0.0.0.0:50051';
+  server.bindAsync(port, grpc.ServerCredentials.createInsecure(), () => {
     server.start();
+    console.log(`SampleServer started on ${port}`);
   });
 }
 
