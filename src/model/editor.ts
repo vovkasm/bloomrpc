@@ -28,9 +28,14 @@ interface TabRequestInfo extends EditorRequest {
 export class Editor {
   private _store = new Store<EditorStorage>({ name: 'editor' });
   private _url: string = this._store.get('url', '');
+  private _metadata: string = this._store.get('metadata', '');
 
   get url(): string {
     return this._url;
+  }
+
+  get metadata(): string {
+    return this._metadata;
   }
 
   constructor() {
@@ -40,6 +45,11 @@ export class Editor {
   setUrl(val: string) {
     this._url = val;
     this._store.set('url', this._url);
+  }
+
+  setMetadata(val: string) {
+    this._metadata = val;
+    this._store.set('metadata', this._metadata);
   }
 
   clear() {

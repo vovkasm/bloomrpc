@@ -1,10 +1,11 @@
 import { Icon } from '@blueprintjs/core';
+import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
 import { useState } from 'react';
 import AceEditor from 'react-ace';
 
-import { storeMetadata } from '../../storage';
+import { useRootModel } from '../../model-provider';
 
 interface MetadataProps {
   onMetadataChange: (value: string) => void;
@@ -13,7 +14,9 @@ interface MetadataProps {
 
 const minHeight = 32;
 
-export function Metadata({ onMetadataChange, value }: MetadataProps) {
+export const Metadata = observer<MetadataProps>(({ onMetadataChange, value }) => {
+  const root = useRootModel();
+
   const [height, setHeight] = useState(minHeight);
   const visibile = height > minHeight;
 
@@ -67,7 +70,7 @@ export function Metadata({ onMetadataChange, value }: MetadataProps) {
             fontSize={13}
             name="metadata"
             onChange={(value) => {
-              storeMetadata(value);
+              root.editor.setMetadata(value);
               onMetadataChange(value);
             }}
             showPrintMargin={false}
@@ -82,7 +85,7 @@ export function Metadata({ onMetadataChange, value }: MetadataProps) {
       </div>
     </Resizable>
   );
-}
+});
 
 const styles = {
   optionLabel: {

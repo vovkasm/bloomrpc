@@ -7,7 +7,6 @@ import { GRPCEventEmitter, ProtoInfo } from '../../behaviour';
 import { exportResponseToJSONFile } from '../../behaviour/response';
 import type { Certificate, Root } from '../../model';
 import { useRootModel } from '../../model-provider';
-import { getMetadata } from '../../storage';
 import { AddressBar } from './AddressBar';
 import { Controls } from './Controls';
 import { Metadata } from './Metadata';
@@ -76,7 +75,7 @@ export class EditorViewModel {
 
     this.url = initialRequest?.url || this._root.editor.url || '0.0.0.0:3009';
     this.interactive = initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false;
-    this.metadata = initialRequest?.metadata || getMetadata() || '';
+    this.metadata = initialRequest?.metadata || this._root.editor.metadata || '';
     this.grpcWeb = initialRequest?.grpcWeb ?? false;
     this.environmentName = initialRequest?.environment;
 

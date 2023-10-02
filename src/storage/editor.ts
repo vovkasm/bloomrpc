@@ -10,7 +10,6 @@ type EditorStorage = {
   protos: string[];
   tabs: EditorTabsStorage;
   requests: TabRequestInfo[];
-  metadata: string;
 };
 
 const EditorStore = new Store<EditorStorage>({
@@ -22,7 +21,6 @@ const KEYS = {
   TABS: 'tabs',
   REQUESTS: 'requests',
   INTERACTIVE: 'interactive',
-  METADATA: 'metadata',
 } as const;
 
 /**
@@ -115,14 +113,6 @@ export function storeRequestInfo({
   const requestList = EditorStore.get('requests', []).filter((requestItem: TabRequestInfo) => requestItem.id !== id);
 
   EditorStore.set(KEYS.REQUESTS, [...requestList, request]);
-}
-
-export function storeMetadata(metadata: string) {
-  EditorStore.set(KEYS.METADATA, metadata);
-}
-
-export function getMetadata() {
-  return EditorStore.get(KEYS.METADATA);
 }
 
 /**
