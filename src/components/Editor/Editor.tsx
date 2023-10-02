@@ -2,13 +2,12 @@ import { makeAutoObservable, observable } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import * as React from 'react';
-import { useEffect } from 'react';
 
 import { GRPCEventEmitter, ProtoInfo } from '../../behaviour';
 import { exportResponseToJSONFile } from '../../behaviour/response';
-import type { Certificate } from '../../model';
+import type { Certificate, Root } from '../../model';
 import { useRootModel } from '../../model-provider';
-import { getMetadata, getUrl, storeUrl } from '../../storage';
+import { getMetadata } from '../../storage';
 import { AddressBar } from './AddressBar';
 import { Controls } from './Controls';
 import { Metadata } from './Metadata';
@@ -48,6 +47,8 @@ export interface EditorResponse {
 }
 
 export class EditorViewModel {
+  private _root: Root;
+
   url: string;
   interactive: boolean;
   metadata: string;
@@ -70,8 +71,10 @@ export class EditorViewModel {
     );
   }
 
-  constructor(initialRequest: EditorRequest | undefined, protoInfo: ProtoInfo | undefined) {
-    this.url = initialRequest?.url || getUrl() || '0.0.0.0:3009';
+  constructor(root: Root, initialRequest: EditorRequest | undefined, protoInfo: ProtoInfo | undefined) {
+    this._root = root;
+
+    this.url = initialRequest?.url || this._root.editor.url || '0.0.0.0:3009';
     this.interactive = initialRequest?.interactive ?? protoInfo?.usesStream?.() ?? false;
     this.metadata = initialRequest?.metadata || getMetadata() || '';
     this.grpcWeb = initialRequest?.grpcWeb ?? false;
@@ -184,7 +187,7 @@ export class EditorViewModel {
 export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequestChange, active }) => {
   const root = useRootModel();
 
-  const viewModel = useLocalObservable(() => new EditorViewModel(initialRequest, protoInfo));
+  const viewModel = useLocalObservable(() => new EditorViewModel(root, initialRequest, protoInfo));
 
   return (
     <div style={styles.tabContainer}>
@@ -229,7 +232,7 @@ export const Editor = observer<EditorProps>(({ protoInfo, initialRequest, onRequ
             }}
             onChangeUrl={(e) => {
               viewModel.setUrl(e.target.value);
-              storeUrl(e.target.value);
+              root.editor.setUrl(e.target.value);
               onRequestChange && onRequestChange(viewModel.toPlainRequest());
             }}
           />

@@ -7,7 +7,6 @@ import type { EditorRequest } from '../components/Editor';
 import type { EditorTabRequest } from '../components/TabList';
 
 type EditorStorage = {
-  url: string;
   protos: string[];
   tabs: EditorTabsStorage;
   requests: TabRequestInfo[];
@@ -19,28 +18,12 @@ const EditorStore = new Store<EditorStorage>({
 });
 
 const KEYS = {
-  URL: 'url',
   PROTOS: 'protos',
   TABS: 'tabs',
   REQUESTS: 'requests',
   INTERACTIVE: 'interactive',
   METADATA: 'metadata',
 } as const;
-
-/**
- * Store URL
- * @param url
- */
-export function storeUrl(url: string) {
-  EditorStore.set(KEYS.URL, url);
-}
-
-/**
- * Get URL
- */
-export function getUrl(): string | void {
-  return EditorStore.get(KEYS.URL);
-}
 
 /**
  * Store Proto List on the sidebar

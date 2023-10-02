@@ -2,7 +2,8 @@ import { ipcRenderer } from 'electron';
 import { makeAutoObservable } from 'mobx';
 import { basename } from 'path';
 
-import { CertFile, Certificate, Certs } from './certs';
+import { Certificate, Certs } from './certs';
+import { Editor } from './editor';
 import { Environments } from './environments';
 import { ImportPaths } from './import-paths';
 
@@ -10,6 +11,7 @@ export class Root {
   readonly certs = new Certs();
   readonly importPaths = new ImportPaths();
   readonly environments = new Environments();
+  readonly editor = new Editor();
 
   constructor() {
     makeAutoObservable(this);
@@ -50,5 +52,12 @@ export class Root {
 
   private async openFile(): Promise<string | undefined> {
     return await ipcRenderer.invoke('open-single-file');
+  }
+
+  clear() {
+    this.certs.clear();
+    this.editor.clear();
+    this.environments.clear();
+    this.importPaths.clear();
   }
 }
